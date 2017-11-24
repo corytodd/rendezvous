@@ -1,14 +1,16 @@
 from flask import Flask, jsonify, request, abort
 from functools import wraps
+import werkzeug.exceptions as ex
 
-from api.common import db
+from api.common import db, custom_abort
 from api.resources import user
 from api.resources import course
 from api.resources import stats
+from api.resources import scrape
 
 app = Flask(__name__)
-
 ver = "/api/v1.0"
+custom_abort.register(ex.default_exceptions)
 
 
 def check_authorization(check_auth):
@@ -56,7 +58,18 @@ def get_stats():
 
 @app.route(ver + '/tasks/scrape', methods=['POST'])
 def task_scrape():
-    return jsonify({})
+    course_id = request.args.get('course_id')
+    result = {}
+    try:
+        result = scrape.start_scrap(course_id)
+    except scrape.NoLoginAvailable:
+        abort(424)
+    return jsonify(result)
+
+
+@app.errorhandler(424)
+def no_login_for_course(e):
+    return 'No login credentials for course'
 
 
 if __name__ == '__main__':

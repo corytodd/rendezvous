@@ -21,9 +21,11 @@ def iterate_piazza_posts(network_id, username, password, limit=10):
     :param network_id: Piazza course id from url
     :param username: Piazza student email login
     :param password: Piazza student login password
+    :param limit: Stop iterating after this many posts
     :type network_id: str
     :type username: str
     :type password: str
+    :type limit: int
     :return piazza post iterator
     :rtype iterator:
     """

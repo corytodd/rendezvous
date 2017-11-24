@@ -42,16 +42,23 @@ class PiazzaPost(object):
         self.is_original_post = is_original_post
 
 
+class NoLoginAvailable(Exception):
+    """Raised when a course id does not have a known authentication
+    record."""
+    pass
+
+
 def start_scrap(course_id):
     """Begin the scraping process targeting the specified Piazza course id
 
     :param course_id: Piazza course ID
     :type course_id: str
+    :raises NoLoginAvailable: If no login credentials are available for specified course
     """
     try:
         login = Login.get(Login.can_access == course_id)
     except DoesNotExist:
-        raise Exception("No login available for this class")
+        raise NoLoginAvailable("No login available for this class")
 
     scrape_record = Scrape(course_scanned=course_id)
     for obj in iterate_piazza_posts(course_id, login.username, login.password):
