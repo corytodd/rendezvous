@@ -7,10 +7,10 @@ def setup():
     from api.resources.stats import Stats
     from api.resources.user import User
     from api.resources.course import Course
-    from api.resources.scrape import Scrape
+    from api.resources.scrape import Scrape, Login
     db.connect()
-    tables = [User, Stats, Course, Scrape]
-    #db.drop_tables(tables, safe=False)
+    tables = [User, Stats, Course, Scrape, Login]
+    db.drop_tables(tables, safe=True)
     db.create_tables(tables, safe=True)
 
 
