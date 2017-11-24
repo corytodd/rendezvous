@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">        
+      <link rel="stylesheet" type="text/css" href="css/materialize.min.css">
+      <link rel="stylesheet" type="text/css" href="css/style.css">      
+  </head>
+  <script type="text/javascript" src="https://www.gstatic.com/firebasejs/4.0.0/firebase.js"></script>
+  <script type="text/javascript" src="js/jquery.min.js"></script>
+  <script type="text/javascript" src="js/popup.js"></script>
+  <script type="text/javascript" src="js/materialize.min.js"></script>
+  <body>
+
+        <div class="section center" id="spinner">
+            <div class="preloader-wrapper big active">
+                <div class="spinner-layer spinner-blue">
+                    <div class="circle-clipper left">
+                    <div class="circle"></div>
+                    </div><div class="gap-patch">
+                    <div class="circle"></div>
+                    </div><div class="circle-clipper right">
+                    <div class="circle"></div>
+                    </div>
+                </div>
+            
+                <div class="spinner-layer spinner-red">
+                    <div class="circle-clipper left">
+                    <div class="circle"></div>
+                    </div><div class="gap-patch">
+                    <div class="circle"></div>
+                    </div><div class="circle-clipper right">
+                    <div class="circle"></div>
+                    </div>
+                </div>
+            
+                <div class="spinner-layer spinner-yellow">
+                    <div class="circle-clipper left">
+                    <div class="circle"></div>
+                    </div><div class="gap-patch">
+                    <div class="circle"></div>
+                    </div><div class="circle-clipper right">
+                    <div class="circle"></div>
+                    </div>
+                </div>
+            
+                <div class="spinner-layer spinner-green">
+                    <div class="circle-clipper left">
+                    <div class="circle"></div>
+                    </div><div class="gap-patch">
+                    <div class="circle"></div>
+                    </div><div class="circle-clipper right">
+                    <div class="circle"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="row">
+                <div class="col s12">
+                    <ul class="tabs">
+                        <li class="tab col s3"><a href="#tab1">Overview</a></li>
+                        <li class="tab col s3"><a href="#tab2">Quality</a></li>
+                        <li class="tab col s3"><a href="#tab3">Tone</a></li>
+                    </ul>
+                </div>
+            </div>
+
+          <div id="tab1" class="col s12">
+
+                <div class="row">
+                    <div class="col s6">
+                        <h2 class="greeting">Loading...</h2>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="section" id="main-content-container">
+                    <div class="row">
+                        <div class="col s12 valign-wrapper">
+                            <h3 id="main-content"></h3>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col s12">
+                            <div id="engagement"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="user-details-container">
+                    <div id="user-details">
+                        <div class="section">
+                            <div class="row center">
+                                <button id="login-button" class="btn waves-effect waves-light action-button" type="submit" name="action" >Sign-in with Google</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+          </div>
+
+            <div id="tab2" class="col s12">
+                <div class="row">
+                    <div class="col s6">
+                        <h2 class="greeting">Loading...</h2>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="section" id="quality-content-container">
+                    <div class="row">
+                        <div class="col s12 valign-wrapper">
+                            <h3 id="quality-content"></h3>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col s12">
+                            <div id="quality"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab3" class="col s12">
+                <div class="row">
+                    <div class="col s6">
+                        <h2 class="greeting">Loading...</h2>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="section" id="tone-content-container">
+                    <div class="row">
+                        <div class="col s12 valign-wrapper">
+                            <h3 id="tone-content"></h3>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col s12">
+                            <div id="tone"></div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col s12 center-align">
+                            <h5>Emotional Gradient Over Time</h5>
+                        </div>
+                    </div>
+                    <div class="tone-gradient row">
+                        <div class="col s6">
+                            <h5 class="left-align">Start</h5>
+                        </div>
+                        <div class="col s6">
+                            <h5 class="right">Now</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="left"></div>
+        <div id="right"></div>
+        <div id="top"></div>
+        <div id="bottom"></div>
+  </body>
+</html>
