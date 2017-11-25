@@ -13,13 +13,17 @@ ver = "/api/v1.0"
 custom_abort.register(ex.default_exceptions)
 
 
-def check_authorization(check_auth):
-    @wraps(check_auth)
+def check_authorization(func):
+
+    @wraps(func)
     def check_api_key(*args, **kwargs):
         lts_id = request.args.get('lts_id')
         secret = request.args.get('secret')
         if not user.is_valid_user(lts_id, secret):
             abort(401)
+        return func(*args, **kwargs)
+
+    return check_api_key
 
 
 @app.route(ver + '/enroll', methods=['POST'])
@@ -32,8 +36,8 @@ def enroll_user():
     return jsonify({"keep_this": new_user.secret})
 
 
-@check_authorization
 @app.route(ver + '/addcourse', methods=['POST'])
+@check_authorization
 def add_course():
     course_id = request.args.get('course_id')
     course_name = request.args.get('course_name')
@@ -44,8 +48,8 @@ def add_course():
     return jsonify({"course_id": course_id, "course_name": course_name})
 
 
-@check_authorization
 @app.route(ver + '/stats', methods=['GET'])
+@check_authorization
 def get_stats():
     lts_id = request.args.get('lts_id')
     course_id = request.args.get('course_id')

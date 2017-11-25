@@ -49,8 +49,11 @@ def is_valid_user(lts_id, secret):
     :return True if valid user, else false
     :rtype bool:
     """
-    user = User.get((User.lts_id == lts_id) & (User.id == secret))
-    return user is not None
+    try:
+        user = User.get((User.lts_id == lts_id) & (User.secret == secret))
+        return user is not None
+    except peewee.DoesNotExist:
+        return False
 
 
 def add_course_to_user(lts_id, course_id):
@@ -61,5 +64,6 @@ def add_course_to_user(lts_id, course_id):
         prev = json.loads(user.courses)
         user.courses = json.dumps(list(set(prev + [course_id])))
         user.save()
+        return True
     except peewee.DoesNotExist:
-        pass
+        return False

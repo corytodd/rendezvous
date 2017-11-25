@@ -4,8 +4,8 @@ from api.app import app
 from api.common import db
 import unittest
 
-class TestEnroll(unittest.TestCase):
 
+class TestEnroll(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         db.setup(clean=True)
@@ -24,7 +24,6 @@ class TestEnroll(unittest.TestCase):
         pass
 
     def test_enroll_new_user(self):
-        # Enroll a user, expect success
         user = {
             'lts_id': '1234',
             'secret': ''}
@@ -37,6 +36,7 @@ class TestEnroll(unittest.TestCase):
         data = json.loads(result.data)
         self.assertIsNotNone(data)
 
+        # Make sure we can use the code we just received
         user['secret'] = data['keep_this']
         result = self.api.post('/api/v1.0/enroll', query_string=user)
         self.assertEqual(result.status_code, 200)

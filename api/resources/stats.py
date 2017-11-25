@@ -3,6 +3,7 @@ import json
 from peewee import IntegerField, BlobField, FloatField, DoesNotExist, CharField
 
 from api.common.db import BaseModel
+from api.resources import course
 
 
 class Stats(BaseModel):
@@ -20,8 +21,14 @@ class Stats(BaseModel):
 
 
 def get_stats(lts_id):
-    """Returns the stats for the specified user or None if not found"""
-    try:
-        Stats.get().where(Stats.lts_id == lts_id)
-    except DoesNotExist:
-        return {"stats": {}}
+    """Returns the stats for the specified user or None if not found
+    :param lts_id: Student id
+    :type lts_id: str
+    :return dictionary of stats keyed by course name
+    :rtype dict:
+    """
+    result = {}
+    for st in Stats.select().where(Stats.lts_id == lts_id):
+        name = course.get_course_name(st.course_id)
+        result[name] = {}
+    return result

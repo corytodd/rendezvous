@@ -4,7 +4,6 @@ from peewee import CharField, DateTimeField, IntegerField, DoesNotExist
 
 from api.common import util
 from api.common.db import BaseModel
-from api.common.util import iterate_piazza_posts
 
 
 class Login(BaseModel):
@@ -48,11 +47,13 @@ class NoLoginAvailable(Exception):
     pass
 
 
-def start_scrap(course_id):
+def start_scrape(course_id, source):
     """Begin the scraping process targeting the specified Piazza course id
 
     :param course_id: Piazza course ID
+    :param source: JSON generator function
     :type course_id: str
+    :type source: function(str, str, str) -> yield JSON dict
     :raises NoLoginAvailable: If no login credentials are available for specified course
     """
     try:
@@ -61,7 +62,7 @@ def start_scrap(course_id):
         raise NoLoginAvailable("No login available for this class")
 
     scrape_record = Scrape(course_scanned=course_id)
-    for obj in iterate_piazza_posts(course_id, login.username, login.password):
+    for obj in source(course_id, login.username, login.password):
         scrape_record.posts_scanned += 1
 
         cid = obj['nr']
@@ -109,3 +110,4 @@ def start_scrap(course_id):
         get_children(obj)
 
     scrape_record.end_time = datetime.datetime.now()
+    return scrape_record
