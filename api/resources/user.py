@@ -31,9 +31,12 @@ def create_if_not_exist(lts_id, secret=None):
     if not validate_params(str, lts_id, secret):
         return None
     try:
+        # Synchronize user creation in case client is misbehaving
         with db.atomic():
             return User.create(lts_id=lts_id, secret=uuid.uuid4().hex)
     except peewee.IntegrityError:
+        # lts_id is unique so if this fails, we know the users exists
+        # so fetch and validate secret match
         pass
     user = User.get(User.lts_id == lts_id)
     return user if user.secret == secret else None
