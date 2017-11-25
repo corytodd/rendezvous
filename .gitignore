@@ -2,3 +2,4 @@
 env/
 .idea/dataSources/
 /.idea/workspace.xml
+*.sqlite3
