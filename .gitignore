@@ -1,3 +1,4 @@
 *.pyc
 env/
 .idea/dataSources/
+/.idea/workspace.xml
