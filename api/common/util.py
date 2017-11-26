@@ -56,12 +56,14 @@ class PiazzaWrapper(object):
     def get_post_iterator(self, limit=10):
         """Returns an interator for the specified number of posts
 
-            :param limit: Number of posts to iterate over. Set to None
+            :param limit: Number of posts to iterate over. Set to -1
                 to retrieve all posts.
             :type limit: int
             :return Iterator that returns JSON
             :rtype iterator
         """
+        if limit < 0:
+            limit = None
         return self.network.iter_all_posts(limit)
 
 

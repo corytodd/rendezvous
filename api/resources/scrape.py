@@ -41,28 +41,37 @@ class PiazzaPost(object):
         self.is_original_post = is_original_post
 
 
-class NoLoginAvailable(Exception):
-    """Raised when a course id does not have a known authentication
-    record."""
-    pass
+def make_piazza_wrapper(course_id):
+    """Creates a Piazza RPC wrapper using the specified login info
 
-
-def start_scrape(course_id, source):
-    """Begin the scraping process targeting the specified Piazza course id
-
-    :param course_id: Piazza course ID
-    :param source: JSON generator function
-    :type course_id: str
-    :type source: function(str, str, str) -> yield JSON dict
-    :raises NoLoginAvailable: If no login credentials are available for specified course
+        :param course_id: Piazza course ID
+        :type course_id: str
+        :return PiazzaWrapper instance
+        :rtype PiazzaWrapper
+        :raises InvalidPiazzaLogin: If stored credentials are invalid
     """
     try:
         login = Login.get(Login.can_access == course_id)
+        wrapper = util.PiazzaWrapper(course_id, str(login.username),
+                                     str(login.password))
+        wrapper.login()
+        return wrapper
     except DoesNotExist:
-        raise NoLoginAvailable("No login available for this class")
+        return None
+
+def start_scrape(wrapper, course_id):
+    """Begin the scraping process targeting the specified Piazza course id
+
+    :param wrapper: Piazza wrapper
+    :param course_id: Piazza course ID
+    :type wrapper: PiazzaWrapper
+    :type course_id: str
+    """
+
+    it = wrapper.get_post_iterator(limit=-1)
 
     scrape_record = Scrape(course_scanned=course_id)
-    for obj in source(course_id, login.username, login.password):
+    for obj in it:
         scrape_record.posts_scanned += 1
 
         cid = obj['nr']
@@ -92,11 +101,25 @@ def start_scrape(course_id, source):
                 return
 
             for child in _obj['children']:
-                if 'uid' not in child:
-                    print("Coward anon child: {}".format(cid))
-                    _uuid = 'anon'
+                _uuid = 'anon'
+                if 'type' not in child:
+                    # Malformed
+                    continue
+                if child['type'] in ['feedback', 'followup']:
+                    if 'uid' in child:
+                        _uuid = child['uid']
+                elif child['type'] in ['s_answer', 'i_answer']:
+                    if 'uid' in child:
+                        _uuid = child['uid']
+                    elif len(child['history']) > 0:
+                        if 'uid' in child['history'][0]:
+                            _uuid = child['history'][0]['uid']
+                elif child['type'] == 'dupe':
+                    print("Skipping duplicate post")
+                    continue
                 else:
-                    _uuid = child['uid']
+                    # Malformed
+                    continue
 
                 if 'subject' not in child:
                     continue

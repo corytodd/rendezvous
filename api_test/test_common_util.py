@@ -3,20 +3,8 @@ import datetime
 from api.common import util
 import unittest
 
-from api.common.util import InvalidPiazzaLogin, PiazzaWrapper
-
-
-class MockPiazzaWrapper(PiazzaWrapper):
-    def __init__(self):
-        super().__init__('', '', '')
-
-    def login(self):
-        return
-
-    def get_post_iterator(self, limit=3):
-        if not limit:
-            limit = 3
-        return ['data'] * limit
+from api.common.util import InvalidPiazzaLogin
+from api_test.common import MockPiazzaWrapper
 
 
 class TestCommonUtils(unittest.TestCase):

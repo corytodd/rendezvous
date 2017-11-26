@@ -1,8 +1,9 @@
+from concurrent.futures import ThreadPoolExecutor
+
 from flask import Flask, jsonify, request, abort
 from functools import wraps
-import werkzeug.exceptions as ex
 
-from api.common import db, custom_abort
+from api.common import db
 from api.resources import user
 from api.resources import course
 from api.resources import stats
@@ -10,7 +11,8 @@ from api.resources import scrape
 
 app = Flask(__name__)
 ver = "/api/v1.0"
-custom_abort.register(ex.default_exceptions)
+# DOCS https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor
+executor = ThreadPoolExecutor(2)
 
 """
 There are some violations of the single-purpose principal in this app. The reason
@@ -85,17 +87,11 @@ def get_stats():
 def task_scrape():
     """TODO Delete this debug method"""
     course_id = request.args.get('course_id')
-    result = {}
-    try:
-        result = scrape.start_scrape(course_id)
-    except scrape.NoLoginAvailable:
-        abort(424)
-    return jsonify(result)
-
-
-@app.errorhandler(424)
-def no_login_for_course(e):
-    return 'No login credentials for course'
+    wrapper = scrape.make_piazza_wrapper(course_id)
+    if not wrapper:
+        return jsonify("Unknown course login")
+    executor.submit(scrape.start_scrape, wrapper, course_id)
+    return jsonify("Task Started")
 
 
 if __name__ == '__main__':
