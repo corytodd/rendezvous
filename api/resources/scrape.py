@@ -1,8 +1,9 @@
 import datetime
+import logging
 
 from peewee import CharField, DateTimeField, IntegerField, DoesNotExist
 
-from api.common import util
+from api.common import util, nlp
 from api.common.db import BaseModel
 
 
@@ -79,12 +80,12 @@ def start_scrape(wrapper, course_id):
         # OP is the 1st item in the history list
         op = obj['history']
         if len(op) == 0:
-            print("Zero length OP: {}".format(cid))
+            logging.info("Zero length OP: {}".format(cid))
             continue
         post = op[0]
 
         if 'uid' not in post:
-            print("Coward anon: {}".format(cid))
+            logging.info("Coward anon: {}".format(cid))
             uuid = 'anon'
         else:
             uuid = post['uid']
@@ -93,11 +94,12 @@ def start_scrape(wrapper, course_id):
 
         top_post = PiazzaPost(cid, uuid, timestamp,
                               post['content'], True)
+        nlp.process_post(top_post)
 
         def get_children(_obj):
 
             if 'children' not in _obj:
-                print("Abandoned post: {}".format(cid))
+                logging.info("Abandoned post: {}".format(cid))
                 return
 
             for child in _obj['children']:
@@ -115,7 +117,7 @@ def start_scrape(wrapper, course_id):
                         if 'uid' in child['history'][0]:
                             _uuid = child['history'][0]['uid']
                 elif child['type'] == 'dupe':
-                    print("Skipping duplicate post")
+                    logging.info("Skipping duplicate post")
                     continue
                 else:
                     # Malformed
@@ -127,10 +129,11 @@ def start_scrape(wrapper, course_id):
                 _timestamp = util.piazza_time_to_datetime(post['created'])
                 child_post = PiazzaPost(cid, _uuid, _timestamp,
                                         post['subject'], False)
-
+                nlp.process_post(child_post)
                 get_children(child)
 
         get_children(obj)
 
     scrape_record.end_time = datetime.datetime.now()
-    return scrape_record
+    logging.info("Scrape completed")
+    scrape_record.save()

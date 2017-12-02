@@ -286,5 +286,7 @@ function initApp() {
 }
 
 window.onload = function() {
-    chrome.storage.sync.clear(initApp());
+    // TODO on uninstall we need to purge from our database somehow... hmm.
+    //chrome.runtime.setUninstallURL(BASE);
+    initApp()
 };
