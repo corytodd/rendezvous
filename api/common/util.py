@@ -67,7 +67,7 @@ class PiazzaWrapper(object):
         return self.network.iter_all_posts(limit)
 
 
-def iterate_piazza_posts(rpc_wrapper, limit=10):
+def iterate_piazza_posts(rpc_wrapper, limit=10, backoff_fn=None):
     """Iterate over all piazza posts in specified network.
     This function will yield one post at a time until the iterator
     has been exhausted. This uses a random delay algorithm to wait
@@ -76,24 +76,97 @@ def iterate_piazza_posts(rpc_wrapper, limit=10):
 
     :param rpc_wrapper: Piazza RPC wrapper
     :param limit: Stop iterating after this many posts
+    :param backoff_fn: Function to produce a backoff time period,
+        default produces a period between 3 and 7 seconds.
     :type rpc_wrapper: PiazzaWrapper
     :type limit: int, None
-    :return piazza post iterator
+    :type backoff_fn: function->int
+    :yield piazza post iterator
     :rtype iterator:
     """
     it = rpc_wrapper.get_post_iterator(limit=limit)
+    if not backoff_fn:
+        def backoff_fn():
+            return 2 + random.uniform(1.1, 5.1)
     for post in it:
         yield post
-        time.sleep(2 + random.uniform(1.1, 5.1))
+        time.sleep(backoff_fn())
 
 
-def piazza_time_to_datetime(datestr):
-    """Convert a Piazza timestamp to a python datetime
-        :param datestr: Input string
-        :type datestr: str
+def date_from_piazza_str(date_str):
+    """Convert ugly date string into Python datetime
+        :param date_str: Input string
+        :type date_str: str
         :return Python datetime
+        :rtype datetime:
+    """
+    clean = str(date_str).replace(' ', '')
+    return datetime.datetime.strptime(clean, "%Y-%m-%dT%H:%M:%SZ")
+
+
+def date_to_piazza_str(date_obj):
+    """Returns date_obj as Piazza datetime string
+        :param date_obj: Input datetime
+        :type date_obj: datetime.datetime
+        :rtype: str
+        :return string format of datetime
+    """
+    return date_obj.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def date_is_today(date_str):
+    """Return true if date_str is today in local time"""
+    as_date = date_from_piazza_str(date_str)
+    return as_date.date() == datetime.datetime.today().date()
+
+
+def date_get_day_0_of_week():
+    """Returns the date marking start of day zero for this current week
+    To avoid ambiguity and make my life easier, we use Monday as 0.
+    """
+    now = datetime.datetime.today()
+    day_offset = now.weekday()
+    return now - datetime.timedelta(days=day_offset)
+
+
+def date_is_this_week(date_str):
+    """Return true if date_str occurs within current week
+    For all dates, Sunday at midnight is considered epoch
+        :example
+             Week 0 is Sunday 5th 12:00 AM through Sunday 12th 11:59 PM
+             Week 1 is Sunday 12th 12:00 AM ... etc.
+        :
+        :param date_str: input date string in Pizza format, %Y-%m-%dT%H:%M:%SZ
+        :type date_str: str
+        :return Python datetime object
         :rtype datetime
     """
-    datestr = str(datestr).replace(' ', '')
-    astime = datetime.datetime.strptime(datestr, "%Y-%m-%dT%H:%M:%SZ")
-    return astime.timestamp()
+    start_of_week = date_get_day_0_of_week()
+    end_of_week = date_get_day_0_of_week() + datetime.timedelta(days=7)
+    as_date = date_from_piazza_str(date_str)
+    return start_of_week.date() <= as_date.date() < end_of_week.date()
+
+
+def date_is_prev_week(date_str):
+    """Return true if date_str occurs before start of this week and after
+    start of previous week
+    Previous week would satisfy Week -1
+        :example
+             Week -1 is Sunday 5th 12:00 AM through Sunday 12th 11:59 PM
+             Week 0 is Sunday 12th 12:00 AM ... etc.
+        :
+        :param date_str: input date string in Pizza format, %Y-%m-%dT%H:%M:%SZ
+        :type date_str: str
+        :return Python datetime object
+        :rtype datetime
+    """
+    start_of_week = date_get_day_0_of_week()
+    start_of_prev_week = start_of_week - datetime.timedelta(days=7)
+    as_date = date_from_piazza_str(date_str)
+    return start_of_prev_week.date() <= as_date.date() < start_of_week.date()
+
+
+def date_get_weekday(date_str):
+    """Returns day of weeks as integer, Monday == 0"""
+    as_date = date_from_piazza_str(date_str)
+    return as_date.weekday()
