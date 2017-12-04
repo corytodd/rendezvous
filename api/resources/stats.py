@@ -9,7 +9,7 @@ from api.resources import course
 class Stats(BaseModel):
     today_posts = IntegerField(default=0)
     prev_week_posts = IntegerField(default=0)
-    next_week_posts = IntegerField(default=0)
+    this_week_posts = IntegerField(default=0)
     total_posts = IntegerField(default=0)
     sentiment = BlobField(json.dumps([]))
     total_words_posted = IntegerField(default=0)

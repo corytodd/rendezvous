@@ -55,16 +55,13 @@ class TestCommonUtils(unittest.TestCase):
 
     def test_date_is_today(self):
         now = datetime.datetime.today()
-        now_piazza = util.date_to_piazza_str(now)
-        self.assertTrue(util.date_is_today(now_piazza))
+        self.assertTrue(util.date_is_today(now.timestamp()))
 
         tomorrow = now + datetime.timedelta(days=1)
-        tomorrow_piazza = util.date_to_piazza_str(tomorrow)
-        self.assertFalse(util.date_is_today(tomorrow_piazza))
+        self.assertFalse(util.date_is_today(tomorrow.timestamp()))
 
         yesterday = now - datetime.timedelta(days=1)
-        yesterday_piazza = util.date_to_piazza_str(yesterday)
-        self.assertFalse(util.date_is_today(yesterday_piazza))
+        self.assertFalse(util.date_is_today(yesterday.timestamp()))
 
     def test_date_get_day_0(self):
         now = datetime.datetime.today()
@@ -78,20 +75,17 @@ class TestCommonUtils(unittest.TestCase):
         # Previous week
         for i in range(1, 7):
             change = start_of_week - datetime.timedelta(days=i)
-            change_str = util.date_to_piazza_str(change)
-            self.assertFalse(util.date_is_this_week(change_str))
+            self.assertFalse(util.date_is_this_week(change.timestamp()))
 
         # This week
         for i in range(0, 6):
             change = start_of_week + datetime.timedelta(days=i)
-            change_str = util.date_to_piazza_str(change)
-            self.assertTrue(util.date_is_this_week(change_str))
+            self.assertTrue(util.date_is_this_week(change.timestamp()))
 
         # Next week
         for i in range(7, 20):
             change = start_of_week + datetime.timedelta(days=i)
-            change_str = util.date_to_piazza_str(change)
-            self.assertFalse(util.date_is_this_week(change_str))
+            self.assertFalse(util.date_is_this_week(change.timestamp()))
 
     def test_date_is_prev_week(self):
         this_day_last_week = datetime.datetime.today() - datetime.timedelta(days=7)
@@ -101,20 +95,17 @@ class TestCommonUtils(unittest.TestCase):
         # Previous-previous week
         for i in range(1, 7):
             change = start_of_last_week - datetime.timedelta(days=i)
-            change_str = util.date_to_piazza_str(change)
-            self.assertFalse(util.date_is_prev_week(change_str))
+            self.assertFalse(util.date_is_prev_week(change.timestamp()))
 
         # This week
         for i in range(0, 6):
             change = start_of_last_week + datetime.timedelta(days=i)
-            change_str = util.date_to_piazza_str(change)
-            self.assertTrue(util.date_is_prev_week(change_str))
+            self.assertTrue(util.date_is_prev_week(change.timestamp()))
 
         # Next week
         for i in range(7, 20):
             change = start_of_last_week + datetime.timedelta(days=i)
-            change_str = util.date_to_piazza_str(change)
-            self.assertFalse(util.date_is_prev_week(change_str))
+            self.assertFalse(util.date_is_prev_week(change.timestamp()))
 
     def test_get_weekday(self):
         # really silly test because Python is doing all the work

@@ -114,9 +114,9 @@ def date_to_piazza_str(date_obj):
     return date_obj.strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-def date_is_today(date_str):
-    """Return true if date_str is today in local time"""
-    as_date = date_from_piazza_str(date_str)
+def date_is_today(timestamp):
+    """Return true if timestamp is today in local time"""
+    as_date = date_from_timestamp(timestamp)
     return as_date.date() == datetime.datetime.today().date()
 
 
@@ -129,25 +129,25 @@ def date_get_day_0_of_week():
     return now - datetime.timedelta(days=day_offset)
 
 
-def date_is_this_week(date_str):
+def date_is_this_week(timestamp):
     """Return true if date_str occurs within current week
     For all dates, Sunday at midnight is considered epoch
         :example
              Week 0 is Sunday 5th 12:00 AM through Sunday 12th 11:59 PM
              Week 1 is Sunday 12th 12:00 AM ... etc.
         :
-        :param date_str: input date string in Pizza format, %Y-%m-%dT%H:%M:%SZ
-        :type date_str: str
+        :param timestamp: input date as Unix timestamp
+        :type timestamp: float
         :return Python datetime object
         :rtype datetime
     """
     start_of_week = date_get_day_0_of_week()
     end_of_week = date_get_day_0_of_week() + datetime.timedelta(days=7)
-    as_date = date_from_piazza_str(date_str)
+    as_date = date_from_timestamp(timestamp)
     return start_of_week.date() <= as_date.date() < end_of_week.date()
 
 
-def date_is_prev_week(date_str):
+def date_is_prev_week(timestamp):
     """Return true if date_str occurs before start of this week and after
     start of previous week
     Previous week would satisfy Week -1
@@ -155,18 +155,26 @@ def date_is_prev_week(date_str):
              Week -1 is Sunday 5th 12:00 AM through Sunday 12th 11:59 PM
              Week 0 is Sunday 12th 12:00 AM ... etc.
         :
-        :param date_str: input date string in Pizza format, %Y-%m-%dT%H:%M:%SZ
-        :type date_str: str
+        :param timestamp: input date as Unix timestamp
+        :type timestamp: float
         :return Python datetime object
         :rtype datetime
     """
     start_of_week = date_get_day_0_of_week()
     start_of_prev_week = start_of_week - datetime.timedelta(days=7)
-    as_date = date_from_piazza_str(date_str)
+    as_date = date_from_timestamp(timestamp)
     return start_of_prev_week.date() <= as_date.date() < start_of_week.date()
 
 
-def date_get_weekday(date_str):
+def date_get_weekday(timestamp):
     """Returns day of weeks as integer, Monday == 0"""
-    as_date = date_from_piazza_str(date_str)
+    as_date = date_from_timestamp(timestamp)
     return as_date.weekday()
+
+def date_from_timestamp(timestamp):
+    """Returns datetime from unix timestamp"""
+    return datetime.datetime.fromtimestamp(timestamp)
+
+def date_get_day_of_year(timestamp):
+    """Returns integer day of year from timestamp"""
+    return datetime.datetime.fromtimestamp(timestamp).timetuple().tm_yday

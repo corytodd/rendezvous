@@ -71,6 +71,9 @@ def start_scrape(wrapper, course_id):
 
     it = wrapper.get_post_iterator(limit=-1)
 
+    # Keyed by user UID, value is Stats object in dict form
+    user_stats_dict = {}
+
     scrape_record = Scrape(course_scanned=course_id)
     for obj in it:
         scrape_record.posts_scanned += 1
@@ -90,14 +93,15 @@ def start_scrape(wrapper, course_id):
         else:
             uuid = post['uid']
 
-        timestamp = util.piazza_time_to_datetime(post['created'])
+        timestamp = util.date_from_piazza_str(post['created']).timestamp()
 
         top_post = PiazzaPost(cid, uuid, timestamp,
                               post['content'], True)
-        nlp.process_post(top_post)
+        user_stats_dict = nlp.process_post(top_post, user_stats_dict)
 
         def get_children(_obj):
 
+            global user_stats_dict
             if 'children' not in _obj:
                 logging.info("Abandoned post: {}".format(cid))
                 return
@@ -126,10 +130,11 @@ def start_scrape(wrapper, course_id):
                 if 'subject' not in child:
                     continue
 
-                _timestamp = util.piazza_time_to_datetime(post['created'])
+                _timestamp = util.date_from_piazza_str(post['created']).timestamp()
                 child_post = PiazzaPost(cid, _uuid, _timestamp,
                                         post['subject'], False)
-                nlp.process_post(child_post)
+                # TODO
+                #user_stats_dict = nlp.process_post(child_post, user_stats_dict)
                 get_children(child)
 
         get_children(obj)
