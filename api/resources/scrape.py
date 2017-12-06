@@ -29,15 +29,19 @@ class PiazzaPost(object):
     """Not stored in database, hold Piazza post. This only tracks the latest revision of
     a post, history is not considered"""
 
-    def __init__(self, cid, user_id, timestamp, content, is_original_post):
+    def __init__(self, cid, user_id, course_id, timestamp, topic, content, is_original_post):
         # Unique for a discussion, show in URL cid query param
         self.cid = cid
+        # Unique course id
+        self.course_id = course_id
         # Piazza ID of the user who authored the post
         self.user_id = user_id
         # Datetime the most recent revision of the post was created
         self.timestamp = timestamp
+        # Original post topic
+        self.topic = topic
         # The actual content
-        self.content = content
+        self.content = util.extract_html_text(content)
         # The top level or topic post that all posts are in response to
         self.is_original_post = is_original_post
 
@@ -95,13 +99,12 @@ def start_scrape(wrapper, course_id):
 
         timestamp = util.date_from_piazza_str(post['created']).timestamp()
 
-        top_post = PiazzaPost(cid, uuid, timestamp,
+        top_post = PiazzaPost(cid, uuid, course_id, timestamp, post['subject'],
                               post['content'], True)
-        user_stats_dict = nlp.process_post(top_post, user_stats_dict)
+        nlp.process_post(top_post, user_stats_dict)
 
-        def get_children(_obj):
+        def get_children(_obj, _user_stats_dict):
 
-            global user_stats_dict
             if 'children' not in _obj:
                 logging.info("Abandoned post: {}".format(cid))
                 return
@@ -131,14 +134,14 @@ def start_scrape(wrapper, course_id):
                     continue
 
                 _timestamp = util.date_from_piazza_str(post['created']).timestamp()
-                child_post = PiazzaPost(cid, _uuid, _timestamp,
-                                        post['subject'], False)
-                # TODO
-                #user_stats_dict = nlp.process_post(child_post, user_stats_dict)
-                get_children(child)
+                child_post = PiazzaPost(cid, _uuid, course_id, _timestamp, post['subject'],
+                                        post['content'], False)
+                nlp.process_post(child_post, _user_stats_dict)
+                get_children(child, _user_stats_dict)
 
-        get_children(obj)
+        get_children(obj, user_stats_dict)
 
     scrape_record.end_time = datetime.datetime.now()
     logging.info("Scrape completed")
+    print(user_stats_dict)
     scrape_record.save()

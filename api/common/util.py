@@ -2,7 +2,7 @@ import random
 import time
 
 import datetime
-
+from bs4 import BeautifulSoup
 from piazza_api.exceptions import AuthenticationError
 from piazza_api.piazza import Piazza
 from piazza_api.piazza import PiazzaRPC
@@ -178,3 +178,13 @@ def date_from_timestamp(timestamp):
 def date_get_day_of_year(timestamp):
     """Returns integer day of year from timestamp"""
     return datetime.datetime.fromtimestamp(timestamp).timetuple().tm_yday
+
+def extract_html_text(text):
+    """Returns plain text from HTML blob
+        :param text: input text
+        :type text: str
+        :return String with HTML removed
+        :rtype: str
+    """
+    soup = BeautifulSoup(text, 'html.parser')
+    return soup.get_text()
