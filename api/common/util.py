@@ -188,3 +188,6 @@ def extract_html_text(text):
     """
     soup = BeautifulSoup(text, 'html.parser')
     return soup.get_text()
+
+def make_sentiment_css(sentiment):
+    pass
