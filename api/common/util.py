@@ -1,3 +1,4 @@
+import calendar
 import random
 import time
 
@@ -190,6 +191,10 @@ def date_get_day_of_year(timestamp):
 def date_from_year_day_number(year, day_number):
     """Return date from year and day number, e.g. 2017, 283 == Oct 10 2017"""
     return datetime.datetime(year, 1, 1) + datetime.timedelta(day_number - 1)
+
+def day_from_number(day):
+    """Return day of week name for day, 0-6 where 0 == Monday"""
+    return calendar.day_name[day]
 
 def extract_html_text(text):
     """Returns plain text from HTML blob

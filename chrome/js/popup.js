@@ -82,69 +82,121 @@ function addCourse(student_id, secret) {
  */
 function makeOverviewTable(classes) {
 
-    var keys = [];
-    for (var key in classes) {
-        if (classes.hasOwnProperty(key)) keys.push(key);
-    }
-
     var $table = $('<table/>');
     $table.append('<tr>' +
     '<th> Course </th>' +
     '<th> Today </th>' +
     '<th> This Week </th>' +
+    '<th> Last Week </th>' +
     '<th> All Time </th>' +
     '</tr>');
     $table.addClass('bordered');
 
-    for(var i=0; i<keys.length; i++){
+    for(const k in classes){
 
-        var key = keys[i];
+        var key = k;
         var data = classes[key];
 
         if(data.archived) {
-            key = key +  '<span class="badge new" data-badge-caption="Archived"></span>'
+            key = k +  '<span class="badge new" data-badge-caption="Archived"></span>'
         }
 
         $table.append( '<tr>' +
             '<td>' + key + '</td>' +
-            '<td>' + data.day + '</td>' +
-            '<td>' + data.week + '</td>' +
-            '<td>' + data.total + '</td>' +
+            '<td>' + data.today_posts + '</td>' +
+            '<td>' + data.this_week_posts + '</td>' +
+            '<td>' + data.prev_week_posts + '</td>' +
+            '<td>' + data.total_posts + '</td>' +
             '</tr>');
     }
     return $table;
 }
 
 /**
- * @brief Build an HTML data containing tone data
+ * @brief Generate a pretty pie chart using Canvas JS
+ * @param data to plot as pie
+ * @param ctx HTML canvas handle
+ */
+function makePieCharts(data, ctx) {
+    var backgroundColors = [
+                'rgba(84,48,5, 0.9)',
+                'rgba(140,81,10, 0.9)',
+                'rgba(191,129,45, 0.9)',
+                'rgba(223,194,125, 0.9)',
+                'rgba(128,205,193, 0.9)',
+                'rgba(53,151,143, 0.9)',
+                'rgba(1,102,94, 0.9)'
+            ];
+    var options = {
+        cutoutPercentage: 50,
+        hoverBorderWidth: [2, 2, 2, 2, 2, 2, 2],
+        hoverBorderColor: backgroundColors,
+        legend : {
+            position : 'left'
+        }
+    };
+    var pieData = {
+        labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+        datasets: [{
+            label: 'Posts by Day',
+            data: data.weekday_posts_list,
+            backgroundColor: backgroundColors,
+            borderWidth: 1
+        }]
+    };
+
+    var pie = new Chart(ctx, {
+        type: 'pie',
+        data: pieData,
+        options: options
+    });
+
+}
+
+/**
+ * @brief Generate a sub-table for the minutia of patterns
+ * @param data to parse
+ * @return HTML table
+ */
+function makeSubTable(data) {
+ var $table = $('<table>');
+    $table.append('<tr>' +
+    '<th> Characteristic </th>' +
+    '<th> Assessment </th>' +
+    '</tr>');
+    $table.addClass('bordered');
+    var avg_len = data.total_words_posted / data.total_posts;
+    $table.append('<tr><td>Avg. Words Per Post</td><td>'+ avg_len.toFixed(3) +'</td></tr>');
+    $table.append('<tr><td>Avg. Days Between Posts</td><td>'+ data.days_apart_avg +'</td></tr>');
+    $table.append('<tr><td>Avg. Objectivity</td><td>'+ data.obj_subj +'</td></tr>');
+    $table.append('<tr><td>Favorite Day</td><td>'+ data.favorite_day +'</td></tr>');
+    $table.append('</table>');
+    return $table;
+}
+
+/**
+ * @brief Build an HTML div containing pattern data
  * @param classes dictionary containing stats
  * @returns {*|jQuery|HTMLElement}
  */
-function makeGenericTable(classes) {
+function makePatternDiv(classes) {
 
-    var keys = [];
-    for (var key in classes) {
-        if (classes.hasOwnProperty(key)) keys.push(key);
+    var $patternDiv = $('<div/>');
+    var pieBox = $("#mmm-pie");
+    var count = 0;
+    for(const k in classes){
+
+        var id = 'mmm-pie' + count++;
+        var ctx = $('<canvas id="' + id + '"></canvas>');
+        pieBox.append(ctx);
+
+        var data = classes[k];
+
+        $patternDiv.append( '<h4>' + k  + '</h4>');
+        $patternDiv.append(makeSubTable(data));
+        makePieCharts(data, ctx);
     }
-
-    var $table = $('<table/>');
-    $table.append('<tr>' +
-    '<th> Attribute </th>' +
-    '<th> Score </th>' +
-    '</tr>');
-    $table.addClass('bordered');
-
-    for(var i=0; i<keys.length; i++){
-
-        var key = keys[i];
-        var data = classes[key];
-
-        $table.append( '<tr>' +
-            '<td>' + key + '</td>' +
-            '<td>' + data + '</td>' +
-            '</tr>');
-    }
-    return $table;
+    return $patternDiv;
 }
 
 /**
@@ -215,12 +267,12 @@ function setGreeting(identity, err) {
 
         var main_content = $('#main-content');
         main_content.show();
-        main_content.empty().append('<span class="gray-text text-darken-2">Your Piazza</span>');
+        main_content.empty().append('<span class="gray-text text-darken-2">Your Piazza Posts</span>');
 
         if(Object.keys(courseData).length > 0) {
 
-            $('#engagement').append(makeOverviewTable(courseData['stats']));
-            $('#quality').append(makeGenericTable(courseData['quality']));
+            $('#engagement').append(makeOverviewTable(courseData));
+            $('#quality').append(makePatternDiv(courseData));
 
         } else if (retry > 0) {
             console.info("Class data is not yet ready");

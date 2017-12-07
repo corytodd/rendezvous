@@ -94,6 +94,21 @@ class Stats(BaseModel):
         highest_sent = max(result['sentiment_dict'], key=result['sentiment_dict'].get)
         result['most_negative_date'] = util.date_from_year_day_number(2017, lowest_sent).strftime('%Y-%m-%d')
         result['most_positive_date'] = util.date_from_year_day_number(2017, highest_sent).strftime('%Y-%m-%d')
+        fav_day = result['weekday_posts_list'].index(max(result['weekday_posts_list']))
+        result['favorite_day'] = util.day_from_number(fav_day)
+        obj_subj = sum(result['subjectivity_dict'].values()) / len(result['subjectivity_dict'])
+        if obj_subj > 0.5:
+            result['obj_subj'] = "Mostly subjective: {0:.3f}".format(obj_subj)
+        elif obj_subj > 0.1:
+            result['obj_subj'] = "Mildly subjective: {0:.3f}".format(obj_subj)
+        elif obj_subj > -0.1:
+            result['obj_subj'] = "Neutral: {0:.3f}".format(obj_subj)
+        elif obj_subj > -0.5:
+            result['obj_subj'] = "Mildly objective: {0:.3f}".format(obj_subj)
+        else:
+            result['obj_subj'] = "Mostly objective: {0:.3f}".format(obj_subj)
+
+
         return result
 
 
