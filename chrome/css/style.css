@@ -40,10 +40,10 @@ h1 {
     background-color: #0066FF !important;
 }
 
-.tone-gradient {
-    background: #28cc39;
-    background: -moz-linear-gradient(left, #28cc39 0%, #aa8c8c 35%, #28cc39 100%);
-    background: -webkit-linear-gradient(left, #28cc39 0%, #aa8c8c 35%, #28cc39 100%);
-    background: linear-gradient(to right, #28cc39 0%, #aa8c8c 35%, #28cc39 100%);
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#28cc39', endColorstr='#28cc39', GradientType=1);
+.text-overlay {
+    color: white;
+}
+
+.tall-divider {
+    margin-bottom: 70px;
 }

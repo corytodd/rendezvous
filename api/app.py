@@ -1,8 +1,9 @@
+from concurrent.futures import ThreadPoolExecutor
+
 from flask import Flask, jsonify, request, abort
 from functools import wraps
-import werkzeug.exceptions as ex
 
-from api.common import db, custom_abort
+from api.common import db
 from api.resources import user
 from api.resources import course
 from api.resources import stats
@@ -10,8 +11,16 @@ from api.resources import scrape
 
 app = Flask(__name__)
 ver = "/api/v1.0"
-custom_abort.register(ex.default_exceptions)
+# DOCS https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor
+executor = ThreadPoolExecutor(2)
 
+"""
+There are some violations of the single-purpose principal in this app. The reason
+this was done was because the Chrome extension needed simplification so the enroll/auth
+and get stats/add enlisted course functions serve double duty. However, there are no 
+double-side effects so we're not 100% in violation, rather just showing bad form.
+CAT
+"""
 
 def check_authorization(func):
 
@@ -28,6 +37,11 @@ def check_authorization(func):
 
 @app.route(ver + '/enroll', methods=['POST'])
 def enroll_user():
+    """Enrolls a user in this service or authenticates the user if they
+    already exist.
+
+    /enroll?lts_id=<student_id>&secret=<some_secret_generated_earlier>
+    """
     lts_id = request.args.get('lts_id')
     secret = request.args.get('secret')
     new_user = user.create_if_not_exist(lts_id, secret=secret)
@@ -39,6 +53,10 @@ def enroll_user():
 @app.route(ver + '/addcourse', methods=['POST'])
 @check_authorization
 def add_course():
+    """Adds a new course to this database
+
+    /addcourse?lts_id=<student_id>&secret=<some_secret_generated_earlier>&course_id=<some_course_id>&course_name=<some_friendly_name>
+    """
     course_id = request.args.get('course_id')
     course_name = request.args.get('course_name')
     new_course = course.create_if_not_exist(course_id, course_name)
@@ -51,6 +69,11 @@ def add_course():
 @app.route(ver + '/stats', methods=['GET'])
 @check_authorization
 def get_stats():
+    """Get the stats for the specified user and add this course to users' list
+    if not already listed
+
+    /stats?lts_id=<student_id>&secret=<some_secret_generated_earlier>&course_id=<some_course_id>
+    """
     lts_id = request.args.get('lts_id')
     course_id = request.args.get('course_id')
     user.add_course_to_user(lts_id, course_id)
@@ -62,20 +85,16 @@ def get_stats():
 
 @app.route(ver + '/tasks/scrape', methods=['POST'])
 def task_scrape():
+    """TODO Delete this debug method"""
     course_id = request.args.get('course_id')
-    result = {}
-    try:
-        result = scrape.start_scrap(course_id)
-    except scrape.NoLoginAvailable:
-        abort(424)
-    return jsonify(result)
-
-
-@app.errorhandler(424)
-def no_login_for_course(e):
-    return 'No login credentials for course'
+    wrapper = scrape.make_piazza_wrapper(course_id)
+    if not wrapper:
+        return jsonify("Unknown course login")
+    executor.submit(scrape.start_scrape, wrapper, course_id)
+    return jsonify("Task Started")
 
 
 if __name__ == '__main__':
-    db.setup()
-    app.run(debug=True)
+    debug = True
+    db.setup(clean=False)
+    app.run(debug=debug)
