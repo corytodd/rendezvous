@@ -3,24 +3,8 @@ import logging
 from textblob import TextBlob
 
 from api.common import util
+from api.resources.stats import Stats
 
-
-def new_stats_dict():
-    """Returns a new Stats object dict loaded with defaults"""
-    return {
-        'today_posts': 0,
-        'prev_week_posts': 0,
-        'this_week_posts': 0,
-        'total_posts': 0,
-        'total_words_posted': 0,
-        'weekday_posts_list': [0, 0, 0, 0, 0, 0, 0],
-        'post_day_of_year_dict': {},
-        'days_apart_avg': 0,
-        'sentiment_dict': {},
-        'subjectivity_dict': {},
-        'lts_id' : '',
-        'course_id': ''
-    }
 
 def process_post(post, stats_dict=None):
     """Process PiazzaPost and extract attributes to associated
@@ -39,7 +23,7 @@ def process_post(post, stats_dict=None):
         return stats_dict
 
     if post.user_id not in stats_dict:
-        stats = new_stats_dict()
+        stats = Stats.new_stats_dict()
     else:
         stats = stats_dict[post.user_id]
 
