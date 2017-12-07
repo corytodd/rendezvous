@@ -1,4 +1,5 @@
 import datetime
+import re
 
 from api.common import util
 import unittest
@@ -111,3 +112,19 @@ class TestCommonUtils(unittest.TestCase):
         # really silly test because Python is doing all the work
         start_of_week = util.date_get_day_0_of_week()
         self.assertEqual(0, start_of_week.weekday())
+
+    def test_make_sentiment_css(self):
+        data = {  123: -1.0, 85: -0.5, 213: 0.0, 180: 0.5, 275: 1.0, 179: 0.2 }
+        expected = [32,0,76,96,64,128]
+        css = util.make_sentiment_css(data)
+
+        # css should be three lines, each with the same color codes just
+        # different browser function calls. Split into three lines,
+        # do the regex match on each line
+        pattern = re.compile("(hsl\(\d{1,3})")
+        for line in css.split('\n'):
+            matches = re.findall(pattern, line)
+            self.assertEqual(len(matches), len(expected))
+            for (act, exp) in zip(re.findall(pattern, line), expected):
+                num = int(act.split('(')[1])
+                self.assertEqual(num, exp)

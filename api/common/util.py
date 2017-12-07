@@ -2,6 +2,10 @@ import random
 import time
 
 import datetime
+
+import itertools
+from collections import OrderedDict
+
 from bs4 import BeautifulSoup
 from piazza_api.exceptions import AuthenticationError
 from piazza_api.piazza import Piazza
@@ -190,4 +194,66 @@ def extract_html_text(text):
     return soup.get_text()
 
 def make_sentiment_css(sentiment):
-    pass
+    """Convert sentiment map into a CSS gradient
+        :param sentiment: dict with integer key and float values
+            key represents day of year, float is -1 to 1 sentiment polarity
+        :type sentiment: dict
+        :return css string
+        :rtype str
+    """
+    def make_colors(vals=None, sat=100, lum=50):
+        """Convert val to an HSL string clamped by -1 to 1, red to green
+        respectively. For example, -0.45 will produce
+            :param vals: List of float values to HSLify
+            :type vals: list of float
+            :return List of HSL color strings
+            :rtype list(str)
+        """
+        result = []
+        # Our range has two points, -1 to 1
+        for val in vals:
+            val = int(((val+1)/2) * 128)
+            # HSL with full saturation and half luminance
+            result.append("hsl({}, {}%, {}%)".format(val, sat, lum))
+        return result
+
+    def make_spread(vals=None):
+        """Convert a list of ints to a list of floats distributed as
+        percentages between the 100% scaled min and max values in the list.
+        The list will not be rearranged. For examples, [3, 32, 12, 9, 24]
+        produces [0.0, 100.0, 28.12, 18.75, 65.52]
+            :param vals: list of values to spread
+            :type vals: list of ints
+            :return spread as a scaled list
+            :rtype list of float
+        """
+        copy = list(vals)
+        mn = min(copy)
+        mx = max(copy)
+        factor = 100.0 / float(mx-mn)
+        copy = list(map(lambda x: x - mn, vals))
+        copy = list(map(lambda x: int(x * factor), copy))
+        return copy
+
+    # Algorithm::
+    #  The key is treated as the time series and the entire range
+    #  of values is scaled such that the min and max become the respetive
+    #  0% and 100 % values in the time range. The value is converted
+    #  into a color by converting the clamped -1 to 1 range to an HSL
+    # color space between 0 and 128 (red to green).
+    css = '''background: -moz-linear-gradient(left, {0});
+background: -webkit-linear-gradient(left, {0});
+background: linear-gradient(to right, {0});'''
+
+    # Put tuples in ascending key order
+    in_order = list(OrderedDict(sorted(sentiment.items(), key=lambda t: t[0])).items())
+
+    # This unpacks a list of tuples into n distinct lists, where n is tuple len
+    k, v = zip(*in_order)
+    spread = make_spread(k)
+    colors = make_colors(v)
+    recombined = zip(colors, spread)
+
+    # Join list of tuples back into a string, a. la #FF0000 0%, # 7F8900 15%, ...
+    gradient = ", ".join("%s %s%%" % t for t in recombined)
+    return css.format(gradient)
