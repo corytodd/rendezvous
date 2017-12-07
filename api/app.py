@@ -96,5 +96,5 @@ def task_scrape():
 
 if __name__ == '__main__':
     debug = True
-    db.setup(clean=debug)
+    db.setup(clean=False)
     app.run(debug=debug)
