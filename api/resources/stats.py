@@ -108,7 +108,8 @@ class Stats(BaseModel):
         else:
             result['obj_subj'] = "Mostly objective: {0:.3f}".format(obj_subj)
 
-
+        # TODO BUGBUG if there are more posts than days, the average will be 0
+        result['days_apart_avg'] = 1 if result['days_apart_avg'] == 0 else result['days_apart_avg']
         return result
 
 

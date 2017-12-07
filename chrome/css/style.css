@@ -43,3 +43,7 @@ h1 {
 .text-overlay {
     color: white;
 }
+
+.tall-divider {
+    margin-bottom: 70px;
+}

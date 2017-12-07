@@ -113,11 +113,46 @@ function makeOverviewTable(classes) {
 }
 
 /**
- * @brief Generate a pretty pie chart using Canvas JS
- * @param data to plot as pie
+ * @brief hand rolled labels
+ * @see https://github.com/chartjs/Chart.js/blob/master/src/controllers/controller.doughnut.js#L40
+ * @param chart char.js object
+ * @returns {*}
+ */
+function charLabelGen(chart) {
+    var data = chart.data;
+    if (data.labels.length && data.datasets.length) {
+        return data.labels.map(function (label, i) {
+            var meta = chart.getDatasetMeta(0);
+            var ds = data.datasets[0];
+            var arc = meta.data[i];
+            var custom = arc && arc.custom || {};
+            var getValueAtIndexOrDefault = Chart.helpers.getValueAtIndexOrDefault;
+            var arcOpts = chart.options.elements.arc;
+            var fill = custom.backgroundColor ? custom.backgroundColor : getValueAtIndexOrDefault(ds.backgroundColor, i, arcOpts.backgroundColor);
+            var stroke = custom.borderColor ? custom.borderColor : getValueAtIndexOrDefault(ds.borderColor, i, arcOpts.borderColor);
+            var bw = custom.borderWidth ? custom.borderWidth : getValueAtIndexOrDefault(ds.borderWidth, i, arcOpts.borderWidth);
+            var value = chart.config.data.datasets[arc._datasetIndex].data[arc._index];
+
+            return {
+                text: label + " : " + value,
+                fillStyle: fill,
+                strokeStyle: stroke,
+                lineWidth: bw,
+                hidden: isNaN(ds.data[i]) || meta.data[i].hidden,
+                index: i
+            };
+        });
+    } else {
+        return [];
+    }
+}
+
+/**
+ * @brief Generate a pretty pie chart
+ * @param data list of 7 numbers to plot
  * @param ctx HTML canvas handle
  */
-function makePieCharts(data, ctx) {
+function makePieChart(data, ctx) {
     var backgroundColors = [
                 'rgba(84,48,5, 0.9)',
                 'rgba(140,81,10, 0.9)',
@@ -129,10 +164,14 @@ function makePieCharts(data, ctx) {
             ];
     var options = {
         cutoutPercentage: 50,
-        hoverBorderWidth: [2, 2, 2, 2, 2, 2, 2],
-        hoverBorderColor: backgroundColors,
         legend : {
-            position : 'left'
+            position : 'left',
+            labels: {
+                generateLabels : charLabelGen
+            }
+        },
+        animation : {
+            easing : 'easeInBounce'
         }
     };
     var pieData = {
@@ -140,8 +179,7 @@ function makePieCharts(data, ctx) {
         datasets: [{
             label: 'Posts by Day',
             data: data.weekday_posts_list,
-            backgroundColor: backgroundColors,
-            borderWidth: 1
+            backgroundColor: backgroundColors
         }]
     };
 
@@ -182,7 +220,7 @@ function makeSubTable(data) {
 function makePatternDiv(classes) {
 
     var $patternDiv = $('<div/>');
-    var pieBox = $("#mmm-pie");
+
     var count = 0;
     for(const k in classes){
 
@@ -191,15 +229,15 @@ function makePatternDiv(classes) {
             continue;
         }
 
-        var id = 'mmm-pie' + count++;
-        var ctx = $('<canvas id="' + id + '"></canvas>');
-        pieBox.append(ctx);
-
         var data = classes[k];
 
-        $patternDiv.append( '<h4>' + k  + '</h4>');
+        var ctx = $('<canvas id="mmm-pie' + (count++) + '"></canvas>');
+
+        $patternDiv.append( '<h6 class="center">' + k + '</h6>');
         $patternDiv.append(makeSubTable(data));
-        makePieCharts(data, ctx);
+        $patternDiv.append(ctx);
+        $patternDiv.append(makePieChart(data, ctx));
+        $patternDiv.append('<div class="divider tall-divider"></div>');
     }
     return $patternDiv;
 }
