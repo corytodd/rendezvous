@@ -29,10 +29,11 @@ function enroll(lts_id, success, error) {
  * @brief Fetch the stats of specified user
  * @param student_id LTS unique id for user
  * @param secret authorization token to prevent impersonation
- * @param callback callback receives fetched data
+ * @param success callback receives fetched data
  * @param err callback receives raw ajax error
+ * @param complete called always on completion
  */
-function fetchStats(student_id, secret, callback, err) {
+function fetchStats(student_id, secret, success, err, complete) {
     scrapeCoursePageInfo(function(courseInfo) {
         const payload = {
             'lts_id': student_id,
@@ -43,13 +44,13 @@ function fetchStats(student_id, secret, callback, err) {
             type: 'GET',
             url: BASE + 'stats?' + $.param(payload),
             success: function (data) {
-                callback(data);
+                success(data);
             },
             error: function (data) {
                 err(data);
             },
             complete: function () {
-                $('#spinner').hide();
+                complete();
             }
         });
     });
@@ -93,16 +94,15 @@ function makeOverviewTable(classes) {
     $table.addClass('bordered');
 
     for(const k in classes){
-
-        var key = k;
-        var data = classes[key];
-
-        if(data.archived) {
-            key = k +  '<span class="badge new" data-badge-caption="Archived"></span>'
+        if(!classes.hasOwnProperty(k))
+        {
+            continue;
         }
 
+        var data = classes[k];
+
         $table.append( '<tr>' +
-            '<td>' + key + '</td>' +
+            '<td>' + k + '</td>' +
             '<td>' + data.today_posts + '</td>' +
             '<td>' + data.this_week_posts + '</td>' +
             '<td>' + data.prev_week_posts + '</td>' +
@@ -145,7 +145,7 @@ function makePieCharts(data, ctx) {
         }]
     };
 
-    var pie = new Chart(ctx, {
+    new Chart(ctx, {
         type: 'pie',
         data: pieData,
         options: options
@@ -186,6 +186,11 @@ function makePatternDiv(classes) {
     var count = 0;
     for(const k in classes){
 
+        if(!classes.hasOwnProperty(k))
+        {
+            continue;
+        }
+
         var id = 'mmm-pie' + count++;
         var ctx = $('<canvas id="' + id + '"></canvas>');
         pieBox.append(ctx);
@@ -200,27 +205,31 @@ function makePatternDiv(classes) {
 }
 
 /**
- * @brief Create a greeting based on current time
- * @returns {{phrase: string, title: string}}
+ * @brief Create sentiment gradient div
+ * @param data that contains stats
+ * @param name of this section
+ * @param index of this div from 0
+ * @returns {string|*}
  */
-function makeGreeting() {
-    var now = new Date();
-    var tod = "";
-
-    // After 3am and before noon is morning
-    if(now.getHours() > 3 && now.getHours() < 12) {
-        tod = "morning";
-    } else if(now.getHours() < 17) {
-        // before 5pm is afternoon
-        tod = "afternoon";
-    } else {
-        tod = "evening";
-    }
-
-    return {
-        phrase: "Good " + tod,
-        title: document.title
-    };
+function makeToneDiv(data, name, index) {
+    sentiment ='<div>' +
+            '<div class="row valign-wrapper">' +
+              '<div class="col s3">' +
+                '<span>' + name + '</span>' +
+              '</div>'+
+              '<div class="col s9">' +
+                '<span class="black-text">' +
+                   '<p>Highest Sentiment: ' + data.most_positive_date + '</p>' +
+                   '<p>Lowest Sentiment: ' + data.most_negative_date + '</p>' +
+                '</span>' +
+              '</div>' +
+            '</div>' +
+            '<div class="tone-gradient' + index + ' row">' +
+                '<div class="col s6"><h5 class="left-align text-overlay"></h5></div>' +
+            '</div>' +
+           '</div>';
+    addStyleString('.tone-gradient' + index + ' { ' + data.sentiment_css + '}');
+    return sentiment;
 }
 
 /**
@@ -228,57 +237,54 @@ function makeGreeting() {
  * @param identity Piazza identity string in format user|secret
  * @param err callback function receives raw AJAX error
  */
-function setGreeting(identity, err) {
+function renderData(identity, err) {
 
+    // identity is in a string concat like id|secret
     const student_id = identity[ID_KEY].split('|')[0];
     const secret = identity[ID_KEY].split('|')[1];
 
+    // We don't care if this fails, fire and forget
     addCourse(student_id, secret);
 
+    // Creates data in sections so we're alternating which tabs are being written to
+    // A little weird but it works
     fetchStats(student_id, secret, function (courseData) {
 
-        var username = (typeof courseData.nickname === 'undefined') ? '' : ', ' + courseData.nickname;
-        var info = makeGreeting();
-
+        // First build all the sentiment gradient divs
         var num = 0;
         var sent_container = $("#sentiment-container");
         for(const k in courseData){
-            sent ='<div>' +
-                    '<div class="row valign-wrapper">' +
-                      '<div class="col s3">' +
-                        '<span>' + k + '</span>' +
-                      '</div>'+
-                      '<div class="col s9">' +
-                        '<span class="black-text">' +
-                           '<p>Highest Sentiment: ' + courseData[k].most_positive_date + '</p>' +
-                           '<p>Lowest Sentiment: ' + courseData[k].most_negative_date + '</p>' +
-                        '</span>' +
-                      '</div>' +
-                    '</div>' +
-                    '<div class="tone-gradient' + num + ' row">' +
-                        '<div class="col s6"><h5 class="left-align text-overlay"></h5></div>' +
-                    '</div>' +
-                   '</div>';
-            addStyleString('.tone-gradient' + num++ + ' { ' + courseData[k].sentiment_css + '}');
+
+            if(!courseData.hasOwnProperty(k))
+            {
+                continue;
+            }
+
+            var sent = makeToneDiv(courseData[k], k, num);
             sent_container.append(sent);
+            ++num;
         }
 
-        $(".greeting").text(info.phrase + username);
-
+        // If there is data, render it. Otherwise show the error message
         var main_content = $('#main-content');
         main_content.show();
-        main_content.empty().append('<span class="gray-text text-darken-2">Your Piazza Posts</span>');
 
         if(Object.keys(courseData).length > 0) {
 
-            $('#engagement').append(makeOverviewTable(courseData));
-            $('#quality').append(makePatternDiv(courseData));
+            $('#engagement-container').append(makeOverviewTable(courseData));
+            $('#gradient-container').append(makePatternDiv(courseData));
+
+            main_content.empty().append('<span class="gray-text text-darken-2">Your Piazza Posts</span>');
 
         } else if (retry > 0) {
+
             console.info("Class data is not yet ready");
             main_content.empty().append('<span class="gray-text text-darken-2">Class data is not yet ready</span>');
+
         }
-    }, err);
+    }, err, function () {
+        $('#spinner').hide();
+    });
 }
 
 /**
@@ -288,36 +294,53 @@ function setGreeting(identity, err) {
  * @param callback to pass scraped info to
  */
 function scrapeCoursePageInfo(callback) {
-     chrome.tabs.query({'active': true, 'lastFocusedWindow': true}, function (tabs) {
-         var activeTab = tabs[0];
-         if (activeTab) {
-             var title = activeTab.title;
-             var url = activeTab.url;
 
-             var courseName = title.split('(')[0];
-             var courseId = url.split('/')[4];
-             if(courseId.indexOf('?') >= 0) {
-                 courseId = courseId.split('?')[0];
-             }
-             console.debug("Course Info: " + courseName, courseId);
-             callback({'coursename' : courseName, 'courseid' : courseId });
-         } else {
-             console.info("Failed to get course data from current tab, using mock data");
-             callback({'coursename' : 'OMS CS6460', 'courseid' : 'j6azklk4gaf4v9' });
-         }
-     });
+    // Pain in the ass way to get the tab title and URL
+    chrome.tabs.query({'active': true, 'lastFocusedWindow': true}, function (tabs) {
+
+        var activeTab = tabs[0];
+        if (activeTab) {
+
+            var title = activeTab.title;
+            var url = activeTab.url;
+            var courseName = title.split('(')[0];
+            var courseId = url.split('/')[4];
+            if (courseId.indexOf('?') >= 0) {
+                courseId = courseId.split('?')[0];
+            }
+
+            console.debug("Course Info: " + courseName, courseId);
+            callback({'coursename': courseName, 'courseid': courseId});
+
+        } else {
+
+            // I see you there on the debugger :)
+            console.warn("Failed to get course data from current tab because you're on the debugger. Using mock data");
+            callback({'coursename': 'OMS CS6460', 'courseid': 'j6azklk4gaf4v9'});
+
+        }
+    });
 }
 
 /**
  * @brief Get user id from Piazza token then go ask our backend
- * for a secret
+ * for a secret. This secret will be stored in Chrome storage
+ * for future authorization
+ * @param success callback function(string, callback)
+ * @param error callback function(json data)
  */
 function identifyUser(success, error) {
+
+    // Piazza was kind enough to leave a cookie with our id!
     chrome.cookies.get({"url": "https://piazza.com", "name": "last_piaz_user"}, function (student_id) {
+
+        // Go tell the server we're online and authenticate this ain't our first rodeo
         enroll(student_id.value, function (data) {
+
             var identity = {};
             identity[ID_KEY] = student_id.value + '|' + data['keep_this'];
 
+            // Save this token in Chrome storage
             chrome.storage.sync.set(identity, function() {
                 if(chrome.runtime.error) {
                     console.info("Failed to store identity");
@@ -326,6 +349,7 @@ function identifyUser(success, error) {
                     success(identity, error);
                 }
             });
+
         }, error);
     });
 }
@@ -341,33 +365,40 @@ function addStyleString(str) {
 }
 
 /**
- * On DOM load, begin the authorization process
+ * On DOM load, begin the authorization process. Once
+ * authorized, trigger data fetch and render
  */
 function initApp() {
 
     $('#spinner').show();
 
+    // Common callback for all async functions that require an error handler
     function initErr(error) {
-        $(".greeting").text("Ooops, something went wrong");
+        $("#greeting").text("Ooops, something went wrong");
         console.log(JSON.stringify(error));
     }
 
+    // Fetch user creds from Chrome storage
     chrome.storage.sync.get(ID_KEY, function(identity) {
         if (!chrome.runtime.error) {
             if(Object.keys(identity).length === 0) {
                 console.debug("Creating new user");
-                identifyUser(setGreeting, initErr);
+                identifyUser(renderData, initErr);
             } else {
                 console.debug("Using current identity");
-                setGreeting(identity, initErr);
+                renderData(identity, initErr);
             }
         } else {
-            $(".greeting").text("Ooops, I couldn't retrieve your token");
+            // Plugin is effectively dead if this happens
+            $("#greeting").text("Ooops, I couldn't retrieve your token");
             console.error(chrome.runtime.error);
         }
     });
 }
 
+/**
+ * Entry point
+ */
 window.onload = function() {
     // TODO on uninstall we need to purge from our database somehow... hmm.
     //chrome.runtime.setUninstallURL(BASE);
