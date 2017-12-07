@@ -266,20 +266,20 @@ function renderData(identity, err) {
         }
 
         // If there is data, render it. Otherwise show the error message
-        var main_content = $('#main-content');
-        main_content.show();
+        var engagement_header = $('#engagement-header');
+        engagement_header.show();
 
         if(Object.keys(courseData).length > 0) {
 
             $('#engagement-container').append(makeOverviewTable(courseData));
-            $('#gradient-container').append(makePatternDiv(courseData));
+            $('#pattern-container').append(makePatternDiv(courseData));
 
-            main_content.empty().append('<span class="gray-text text-darken-2">Your Piazza Posts</span>');
+            engagement_header.empty().append('<span class="gray-text text-darken-2">Your Piazza Posts</span>');
 
         } else if (retry > 0) {
 
             console.info("Class data is not yet ready");
-            main_content.empty().append('<span class="gray-text text-darken-2">Class data is not yet ready</span>');
+            engagement_header.empty().append('<span class="gray-text text-darken-2">Class data is not yet ready</span>');
 
         }
     }, err, function () {
