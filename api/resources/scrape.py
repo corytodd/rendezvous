@@ -1,10 +1,12 @@
 import datetime
+import json
 import logging
 
 from peewee import CharField, DateTimeField, IntegerField, DoesNotExist
 
-from api.common import util, nlp
+from api.common import util, nlp, db
 from api.common.db import BaseModel
+from api.resources.stats import Stats
 
 
 class Login(BaseModel):
@@ -19,8 +21,8 @@ class Login(BaseModel):
 
 class Scrape(BaseModel):
     """Record tracks a scrape event, useful for debugging"""
-    start_time = DateTimeField(default=datetime.datetime.now)
-    end_time = DateTimeField(null=True)
+    start_time = DateTimeField(default=datetime.datetime.now, formats='%Y-%m-%d %H:%M:%S.%f')
+    end_time = DateTimeField(null=True,formats='%Y-%m-%d %H:%M:%S.%f')
     course_scanned = CharField(null=False)
     posts_scanned = IntegerField(default=0)
 
@@ -142,6 +144,18 @@ def start_scrape(wrapper, course_id):
         get_children(obj, user_stats_dict)
 
     scrape_record.end_time = datetime.datetime.now()
-    logging.info("Scrape completed")
-    print(user_stats_dict)
     scrape_record.save()
+
+    print("Scrape took: {}".format(scrape_record.end_time - scrape_record.start_time))
+
+    # We must blobify all the dicts in the result so the db doesn't choke
+    data_source = list(user_stats_dict.values())
+    should_blob = ['weekday_posts_list', 'post_day_of_year_dict', 'sentiment_dict', 'subjectivity_dict']
+    for dat in data_source:
+        for k in should_blob:
+            dat[k] = json.dumps(dat[k])
+
+    with db.db.atomic():
+        Stats.insert_many(data_source).execute()
+
+    print("Database store completed")

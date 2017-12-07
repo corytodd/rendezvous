@@ -12,14 +12,13 @@ def new_stats_dict():
         'prev_week_posts': 0,
         'this_week_posts': 0,
         'total_posts': 0,
-        'sentiment': {},
-        'sentiment_trace' : {},
-        'subjectivity': {},
-        'subjectivity_trace' : {},
-        'post_day_of_year' : {},
         'total_words_posted': 0,
-        'weekday_posts': {0:0,1:0,2:0,3:0,4:0,5:0,6:0},
+        'weekday_posts_list': [0, 0, 0, 0, 0, 0, 0],
+        'post_day_of_year_dict': {},
         'days_apart_avg': 0,
+        'sentiment_dict': {},
+        'subjectivity_dict': {},
+        'lts_id' : '',
         'course_id': ''
     }
 
@@ -45,6 +44,7 @@ def process_post(post, stats_dict=None):
         stats = stats_dict[post.user_id]
 
     stats['course_id'] = post.course_id
+    stats['lts_id'] = post.user_id
 
     # Dates
     stats['total_posts'] += 1
@@ -56,52 +56,45 @@ def process_post(post, stats_dict=None):
         stats['this_week_posts'] += 1
 
     day_of_week = util.date_get_weekday(post.timestamp)
-    stats['weekday_posts'][day_of_week] += 1
+    stats['weekday_posts_list'][day_of_week] += 1
 
     day_of_year = util.date_get_day_of_year(post.timestamp)
-    if day_of_year not in stats['post_day_of_year']:
-        stats['post_day_of_year'][day_of_year] = 0
-    stats['post_day_of_year'][day_of_year] += 1
+    if day_of_year not in stats['post_day_of_year_dict']:
+        stats['post_day_of_year_dict'][day_of_year] = 0
+    stats['post_day_of_year_dict'][day_of_year] += 1
 
 
 
-    # NLP - sentiment
+    # NLP - sentiment polarity
     analysis = TextBlob(util.extract_html_text(post.content))
-    if day_of_year not in stats['sentiment']:
-        stats['sentiment'][day_of_year] = 0
-    stats['sentiment'][day_of_year] += analysis.sentiment.polarity
-    stats['sentiment'][day_of_year] /= stats['total_posts']
+
 
     # Calculate average sentiment for this date: score / total post for this day
-    if day_of_year not in stats['sentiment_trace']:
-        stats['sentiment_trace'][day_of_year] = 0.0
-    date_sentiment = stats['sentiment_trace'][day_of_year] + analysis.sentiment.polarity
-    stats['sentiment_trace'][day_of_year] = date_sentiment / stats['post_day_of_year'][day_of_year]
+    if day_of_year not in stats['sentiment_dict']:
+        stats['sentiment_dict'][day_of_year] = 0.0
+    date_sentiment = stats['sentiment_dict'][day_of_year] + analysis.sentiment.polarity
+    stats['sentiment_dict'][day_of_year] = date_sentiment / stats['post_day_of_year_dict'][day_of_year]
 
 
 
     # NLP - subjective vs. objective
-    if day_of_year not in stats['subjectivity']:
-        stats['subjectivity'][day_of_year] = 0
-    stats['subjectivity'][day_of_year] += analysis.sentiment.subjectivity
-    stats['subjectivity'][day_of_year] /= stats['total_posts']
-
     # Calculate average subjectivity for this date: score / total post for this day
-    if day_of_year not in stats['subjectivity_trace']:
-        stats['subjectivity_trace'][day_of_year] = 0.0
-    date_subjectivity = stats['subjectivity_trace'][day_of_year] + analysis.sentiment.polarity
-    stats['subjectivity_trace'][day_of_year] = date_subjectivity / stats['post_day_of_year'][day_of_year]
+    if day_of_year not in stats['subjectivity_dict']:
+        stats['subjectivity_dict'][day_of_year] = 0.0
+    date_subjectivity = stats['subjectivity_dict'][day_of_year] + analysis.sentiment.polarity
+    stats['subjectivity_dict'][day_of_year] = date_subjectivity / stats['post_day_of_year_dict'][day_of_year]
 
     stats['total_words_posted'] += len(analysis.words)
 
     # For average days between, look at post_day_of_year dict, sort, sum the difference and average
     diff = 0
-    days = sorted(stats['post_day_of_year'].keys())
+    days = sorted(stats['post_day_of_year_dict'].keys())
     if len(days) > 0:
         if len(days) % 2 != 0:
             days.pop(-1)
         for a,b in zip(days[::2], days[1::2]):
             diff += b-a
-        stats['days_apart_avg'] = diff / len(stats['post_day_of_year'])
+        stats['days_apart_avg'] = diff / len(stats['post_day_of_year_dict'])
 
+    # Done!
     stats_dict[post.user_id] = stats

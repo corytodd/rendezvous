@@ -3,10 +3,14 @@ import time
 
 import datetime
 
-import itertools
 from collections import OrderedDict
 
 from bs4 import BeautifulSoup
+
+# https://stackoverflow.com/a/41496131
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning, module='bs4')
+
 from piazza_api.exceptions import AuthenticationError
 from piazza_api.piazza import Piazza
 from piazza_api.piazza import PiazzaRPC
