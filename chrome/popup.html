@@ -78,7 +78,7 @@
                 <div class="section" id="main-content-container">
                     <div class="row">
                         <div class="col s12 valign-wrapper">
-                            <h3 id="main-content"></h3>
+                            <h4 id="main-content" class="center-align"></h4>
                         </div>
                     </div>
                     <div class="row">
@@ -123,26 +123,29 @@
 
                 <div class="section" id="tone-content-container">
                     <div class="row">
-                        <div class="col s12 valign-wrapper">
-                            <h3 id="tone-content"></h3>
-                        </div>
-                    </div>
-                    <div class="row">
                         <div class="col s12">
-                            <div id="tone"></div>
+                            <h5>Sentiment Over Time</h5>
                         </div>
+                    </div>
+                    <div id="sentiment-container">
+
                     </div>
                     <div class="row">
-                        <div class="col s12 center-align">
-                            <h5>Emotional Gradient Over Time</h5>
-                        </div>
-                    </div>
-                    <div class="tone-gradient row">
-                        <div class="col s6">
-                            <h5 class="left-align">Start</h5>
-                        </div>
-                        <div class="col s6">
-                            <h5 class="right">Now</h5>
+                        <div class="col s12 m12">
+                          <div class="card grey darken-2">
+                            <div class="card-content white-text">
+                              <span class="card-title">About</span>
+                              <ul>
+                                <li>Green indicates posts trending positive in sentiment</li>
+                                <li>Red indicates posts that are trending negative in sentiment</li>
+                                <li>Time is relative from your first post to the most recent</li>
+                                <li>Multiple posts on a single day are averaged</li>
+                              </ul>
+                            </div>
+                            <div class="card-action">
+                              <a href="http://www.cs.cornell.edu/home/llee/papers/sentiment.pdf">Learn More</a>
+                            </div>
+                          </div>
                         </div>
                     </div>
                 </div>

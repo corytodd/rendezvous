@@ -187,6 +187,10 @@ def date_get_day_of_year(timestamp):
     """Returns integer day of year from timestamp"""
     return datetime.datetime.fromtimestamp(timestamp).timetuple().tm_yday
 
+def date_from_year_day_number(year, day_number):
+    """Return date from year and day number, e.g. 2017, 283 == Oct 10 2017"""
+    return datetime.datetime(year, 1, 1) + datetime.timedelta(day_number - 1)
+
 def extract_html_text(text):
     """Returns plain text from HTML blob
         :param text: input text

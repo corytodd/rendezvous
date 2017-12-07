@@ -188,6 +188,29 @@ function setGreeting(identity, err) {
         var username = (typeof courseData.nickname === 'undefined') ? '' : ', ' + courseData.nickname;
         var info = makeGreeting();
 
+        var num = 0;
+        var sent_container = $("#sentiment-container");
+        for(const k in courseData){
+            sent ='<div>' +
+                    '<div class="row valign-wrapper">' +
+                      '<div class="col s3">' +
+                        '<span>' + k + '</span>' +
+                      '</div>'+
+                      '<div class="col s9">' +
+                        '<span class="black-text">' +
+                           '<p>Highest Sentiment: ' + courseData[k].most_positive_date + '</p>' +
+                           '<p>Lowest Sentiment: ' + courseData[k].most_negative_date + '</p>' +
+                        '</span>' +
+                      '</div>' +
+                    '</div>' +
+                    '<div class="tone-gradient' + num + ' row">' +
+                        '<div class="col s6"><h5 class="left-align text-overlay"></h5></div>' +
+                    '</div>' +
+                   '</div>';
+            addStyleString('.tone-gradient' + num++ + ' { ' + courseData[k].sentiment_css + '}');
+            sent_container.append(sent);
+        }
+
         $(".greeting").text(info.phrase + username);
 
         var main_content = $('#main-content');
@@ -198,7 +221,6 @@ function setGreeting(identity, err) {
 
             $('#engagement').append(makeOverviewTable(courseData['stats']));
             $('#quality').append(makeGenericTable(courseData['quality']));
-            $('#tone').append(makeGenericTable(courseData['tone']));
 
         } else if (retry > 0) {
             console.info("Class data is not yet ready");
@@ -256,6 +278,15 @@ function identifyUser(success, error) {
     });
 }
 
+/**
+ * @brief inject arbitrary css
+ * @param str css to inject
+ */
+function addStyleString(str) {
+    var node = document.createElement('style');
+    node.innerHTML = str;
+    document.body.appendChild(node);
+}
 
 /**
  * On DOM load, begin the authorization process

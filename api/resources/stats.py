@@ -71,7 +71,7 @@ class Stats(BaseModel):
             result['weekday_posts_list'] = [*map(int, result['weekday_posts_list'])]
             int_float_dicts = ['post_day_of_year_dict', 'sentiment_dict', 'subjectivity_dict']
             for m in int_float_dicts:
-                result[m] = {int(k):float(v) for k,v in result[m].items()}
+                result[m] = {int(k): float(v) for k, v in result[m].items()}
         else:
             result = {
                 'today_posts': stats.today_posts,
@@ -89,6 +89,11 @@ class Stats(BaseModel):
             }
         if inject_css:
             result['sentiment_css'] = util.make_sentiment_css(result['sentiment_dict'])
+
+        lowest_sent = min(result['sentiment_dict'], key=result['sentiment_dict'].get)
+        highest_sent = max(result['sentiment_dict'], key=result['sentiment_dict'].get)
+        result['most_negative_date'] = util.date_from_year_day_number(2017, lowest_sent).strftime('%Y-%m-%d')
+        result['most_positive_date'] = util.date_from_year_day_number(2017, highest_sent).strftime('%Y-%m-%d')
         return result
 
 
