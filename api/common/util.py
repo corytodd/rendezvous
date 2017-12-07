@@ -261,3 +261,8 @@ background: linear-gradient(to right, {0});'''
     # Join list of tuples back into a string, a. la #FF0000 0%, # 7F8900 15%, ...
     gradient = ", ".join("%s %s%%" % t for t in recombined)
     return css.format(gradient)
+
+def chunks(l, n):
+    """Yield successive n-sized chunks from l."""
+    for i in range(0, len(l), n):
+        yield l[i:i + n]

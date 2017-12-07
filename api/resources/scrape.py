@@ -155,7 +155,11 @@ def start_scrape(wrapper, course_id):
         for k in should_blob:
             dat[k] = json.dumps(dat[k])
 
-    with db.db.atomic():
-        Stats.insert_many(data_source).execute()
+    try:
+        for m in util.chunks(data_source, 25):
+            with db.db.atomic():
+                Stats.insert_many(m).execute()
 
-    print("Database store completed")
+        print("Database store completed")
+    except Exception as e:
+        print("failed to db: {}".format(e))
