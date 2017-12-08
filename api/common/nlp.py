@@ -47,19 +47,14 @@ def process_post(post, stats_dict=None):
         stats['post_day_of_year_dict'][day_of_year] = 0
     stats['post_day_of_year_dict'][day_of_year] += 1
 
-
-
     # NLP - sentiment polarity
     analysis = TextBlob(util.extract_html_text(post.content))
-
 
     # Calculate average sentiment for this date: score / total post for this day
     if day_of_year not in stats['sentiment_dict']:
         stats['sentiment_dict'][day_of_year] = 0.0
     date_sentiment = stats['sentiment_dict'][day_of_year] + analysis.sentiment.polarity
     stats['sentiment_dict'][day_of_year] = date_sentiment / stats['post_day_of_year_dict'][day_of_year]
-
-
 
     # NLP - subjective vs. objective
     # Calculate average subjectivity for this date: score / total post for this day
@@ -76,8 +71,8 @@ def process_post(post, stats_dict=None):
     if len(days) > 0:
         if len(days) % 2 != 0:
             days.pop(-1)
-        for a,b in zip(days[::2], days[1::2]):
-            diff += b-a
+        for a, b in zip(days[::2], days[1::2]):
+            diff += b - a
         stats['days_apart_avg'] = diff / len(stats['post_day_of_year_dict'])
 
     # Done!

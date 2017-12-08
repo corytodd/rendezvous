@@ -1,5 +1,4 @@
 import datetime
-import json
 import logging
 
 from peewee import CharField, DateTimeField, IntegerField, DoesNotExist
@@ -22,7 +21,7 @@ class Login(BaseModel):
 class Scrape(BaseModel):
     """Record tracks a scrape event, useful for debugging"""
     start_time = DateTimeField(default=datetime.datetime.now, formats='%Y-%m-%d %H:%M:%S.%f')
-    end_time = DateTimeField(null=True,formats='%Y-%m-%d %H:%M:%S.%f')
+    end_time = DateTimeField(null=True, formats='%Y-%m-%d %H:%M:%S.%f')
     course_scanned = CharField(null=False)
     posts_scanned = IntegerField(default=0)
 
@@ -65,6 +64,7 @@ def make_piazza_wrapper(course_id):
         return wrapper
     except DoesNotExist:
         return None
+
 
 def start_scrape(wrapper, course_id):
     """Begin the scraping process targeting the specified Piazza course id

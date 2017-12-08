@@ -1,6 +1,6 @@
 import json
 
-from peewee import IntegerField, BlobField, FloatField, DoesNotExist, CharField
+from peewee import IntegerField, BlobField, CharField
 
 from api.common import util
 from api.common.db import BaseModel

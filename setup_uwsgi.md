@@ -68,10 +68,12 @@ We need Python 3.6 so add the ppa that has this pre-build for us
     sudo apt-get update
     
 We need a bunch of stuff for the uwsgi plugin so let's just do it all at once
+
     sudo apt-get install build-essential python3.6 python3.6-dev uwsgi uwsgi-src uuid-dev libcap-dev libpcre3-dev libssl-dev
     python36 -m venv ~/CS6460/venv
     source ~/CS6460/venv
     pip install -r requirements.txt
+    python -m textblob.download_corpora
 
     cd ~
     PYTHON=python3.6 uwsgi --build-plugin "/usr/src/uwsgi/plugins/python python36"

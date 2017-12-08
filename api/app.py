@@ -13,6 +13,7 @@ app = Flask(__name__)
 ver = "/api/v1.0"
 # DOCS https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor
 executor = ThreadPoolExecutor(2)
+debug = False
 
 """
 There are some violations of the single-purpose principal in this app. The reason
@@ -22,8 +23,8 @@ double-side effects so we're not 100% in violation, rather just showing bad form
 CAT
 """
 
-def check_authorization(func):
 
+def check_authorization(func):
     @wraps(func)
     def check_api_key(*args, **kwargs):
         lts_id = request.args.get('lts_id')
@@ -86,15 +87,15 @@ def get_stats():
 @app.route(ver + '/tasks/scrape', methods=['POST'])
 def task_scrape():
     """TODO Delete this debug method"""
-    course_id = request.args.get('course_id')
-    wrapper = scrape.make_piazza_wrapper(course_id)
-    if not wrapper:
-        return jsonify("Unknown course login")
-    executor.submit(scrape.start_scrape, wrapper, course_id)
-    return jsonify("Task Started")
+    if debug:
+        course_id = request.args.get('course_id')
+        wrapper = scrape.make_piazza_wrapper(course_id)
+        if not wrapper:
+            return jsonify("Unknown course login")
+        executor.submit(scrape.start_scrape, wrapper, course_id)
+        return jsonify("Task Started")
 
 
 if __name__ == '__main__':
-    debug = True
     db.setup(clean=False)
     app.run(debug=debug)

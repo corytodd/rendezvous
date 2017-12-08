@@ -14,8 +14,10 @@ def setup(clean=False):
         db.drop_tables(tables, safe=True)
     db.create_tables(tables, safe=True)
 
+
 def teardown():
     db.close()
+
 
 class BaseModel(Model):
     class Meta:
