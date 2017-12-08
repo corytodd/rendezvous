@@ -6,6 +6,7 @@ from api.common.util import validate_params
 
 
 class Course(BaseModel):
+    """Online course model maps course id to a name"""
     course_id = CharField(null=False)
     course_name = CharField(null=False)
 

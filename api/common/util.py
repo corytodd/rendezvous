@@ -18,20 +18,23 @@ warnings.filterwarnings("ignore", category=UserWarning, module='bs4')
 
 
 def validate_params(should_be, *args):
-    """Returns true if each arg is of type 'should_be'"""
+    """Returns true if each arg is of type 'should_be'
+    """
     if not args:
         return False
     return all(type(a) is should_be for a in args)
 
 
 class InvalidPiazzaLogin(Exception):
-    """Wraps Piazza API auth failure"""
+    """Wraps Piazza API auth failure
+    """
     pass
 
 
 class PiazzaWrapper(object):
     """Wraps Piazza API to control for authentication
-    failure and to enable mocking the service"""
+    failure and to enable mocking the service
+    """
 
     def __init__(self, network_id, username, password):
         """Create a new wrapper
@@ -42,6 +45,7 @@ class PiazzaWrapper(object):
             :type network_id: str
             :type username: str
             :type password: str
+
         """
         self.network_id = network_id
         self.username = username
@@ -51,7 +55,8 @@ class PiazzaWrapper(object):
         self.network = None
 
     def login(self):
-        """Attempts to login to Piazza
+        """
+            Attempts to login to Piazza
             :raises InvalidPiazzaLogin
         """
         try:
@@ -64,12 +69,10 @@ class PiazzaWrapper(object):
 
     def get_post_iterator(self, limit=10):
         """Returns an interator for the specified number of posts
-
-            :param limit: Number of posts to iterate over. Set to -1
-                to retrieve all posts.
+            :param limit: Number of posts to iterate over. Set to -1 to retrieve all posts.
             :type limit: int
             :return Iterator that returns JSON
-            :rtype iterator
+            :rtype iterator:
         """
         if limit < 0:
             limit = None
@@ -78,20 +81,18 @@ class PiazzaWrapper(object):
 
 def iterate_piazza_posts(rpc_wrapper, limit=10, backoff_fn=None):
     """Iterate over all piazza posts in specified network.
-    This function will yield one post at a time until the iterator
-    has been exhausted. This uses a random delay algorithm to wait
-    between 3 and 7 seconds between each fetch. This is to prevent
-    slamming the Piazza servers which are slow enough already.
-
-    :param rpc_wrapper: Piazza RPC wrapper
-    :param limit: Stop iterating after this many posts
-    :param backoff_fn: Function to produce a backoff time period,
-        default produces a period between 3 and 7 seconds.
-    :type rpc_wrapper: PiazzaWrapper
-    :type limit: int, None
-    :type backoff_fn: function->int
-    :yield piazza post iterator
-    :rtype iterator:
+        This function will yield one post at a time until the iterator
+        has been exhausted. This uses a random delay algorithm to wait
+        between 3 and 7 seconds between each fetch. This is to prevent
+        slamming the Piazza servers which are slow enough already.
+        :param rpc_wrapper: Piazza RPC wrapper
+        :param limit: Stop iterating after this many posts
+        :param backoff_fn: Function to produce a backoff time period, default produces a period between 3 and 7 seconds.
+        :type rpc_wrapper: PiazzaWrapper
+        :type limit: int, None
+        :type backoff_fn: function->int
+        :yield piazza post iterator
+        :rtype iterator:
     """
     it = rpc_wrapper.get_post_iterator(limit=limit)
     if not backoff_fn:
@@ -139,10 +140,9 @@ def date_get_day_0_of_week():
 
 
 def date_is_this_week(timestamp):
-    """Return true if date_str occurs within current week
-    For all dates, Sunday at midnight is considered epoch
-        :example
-             Week 0 is Sunday 5th 12:00 AM through Sunday 12th 11:59 PM
+    """Return true if date_str occurs within current week. For all dates, Sunday at midnight is considered epoch
+        :example \
+             Week 0 is Sunday 5th 12:00 AM through Sunday 12th 11:59 PM \
              Week 1 is Sunday 12th 12:00 AM ... etc.
         :
         :param timestamp: input date as Unix timestamp
@@ -157,11 +157,10 @@ def date_is_this_week(timestamp):
 
 
 def date_is_prev_week(timestamp):
-    """Return true if date_str occurs before start of this week and after
-    start of previous week
-    Previous week would satisfy Week -1
-        :example
-             Week -1 is Sunday 5th 12:00 AM through Sunday 12th 11:59 PM
+    """Return true if date_str occurs before start of this week and after start of previous week
+        Previous week would satisfy Week -1
+        :example \
+             Week -1 is Sunday 5th 12:00 AM through Sunday 12th 11:59 PM \
              Week 0 is Sunday 12th 12:00 AM ... etc.
         :
         :param timestamp: input date as Unix timestamp
@@ -214,11 +213,12 @@ def extract_html_text(text):
 
 def make_sentiment_css(sentiment):
     """Convert sentiment map into a CSS gradient
-        :param sentiment: dict with integer key and float values
-            key represents day of year, float is -1 to 1 sentiment polarity
+        :param sentiment: dict with integer key and float values \
+        key represents day of year, float is -1 to 1 sentiment polarity
         :type sentiment: dict
         :return css string
         :rtype str
+
     """
 
     def make_colors(vals=None, sat=100, lum=50):
