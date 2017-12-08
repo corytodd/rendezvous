@@ -1,5 +1,6 @@
 *.pyc
-env/
+venv/
 .idea/dataSources/
 /.idea/workspace.xml
 *.sqlite3
+.uwsgi_plugins_builder/

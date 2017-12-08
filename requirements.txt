@@ -4,3 +4,4 @@ peewee
 bs4
 piazza_api
 textblob
+uwsgi

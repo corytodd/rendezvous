@@ -86,12 +86,18 @@ def get_stats():
 @app.route(ver + '/tasks/scrape', methods=['POST'])
 def task_scrape():
     """TODO Delete this debug method"""
-    course_id = request.args.get('course_id')
-    wrapper = scrape.make_piazza_wrapper(course_id)
-    if not wrapper:
-        return jsonify("Unknown course login")
-    executor.submit(scrape.start_scrape, wrapper, course_id)
-    return jsonify("Task Started")
+    abort(404)
+    return
+    #course_id = request.args.get('course_id')
+    #wrapper = scrape.make_piazza_wrapper(course_id)
+    #if not wrapper:
+    #    return jsonify("Unknown course login")
+    #executor.submit(scrape.start_scrape, wrapper, course_id)
+    #return jsonify("Task Started")
+
+@app.route('/', methods=['GET'])
+def index():
+    return ''
 
 
 if __name__ == '__main__':
