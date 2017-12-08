@@ -1,5 +1,4 @@
 flask
-flask-restful
 peewee
 bs4
 piazza_api

@@ -1,0 +1,13 @@
+Online learning is hard and keeping engaged can be challenge. The current solution for digital classrooms leave somethings to be desired so this extension has added some features missing from platforms like Piazza. With this extension, you will be able to get an overview of how often you are really engaging in your online discussions. 
+
+Research has shown that highly engaged students tend to perform better in their coursework. Sometimes students are just unaware of how little they are truly engaging with their peers. This app will make this interaction transparent and provide some interesting insights.
+
+Features:
+- Do you tend to post at the last minute? It is very apparent when a flood of low-quality posts arrive on the last day of the week. Find out if you are one of "those people"
+- How are your posts perceived by others? Using natural language processing, get a soft-score on the sentiment of your posts over time.
+- Do you speak subjectively or objectively? Find out!
+
+This is an experimental plugin developed as part of my coursework at Georgia Institute of Technology for CS-6460. It uses anonymized Piazza data to create your statistics and does not require any personally identifying information or passwords. Since this is a beta product, only courses that I have actually enrolled in can be analyzed. This is because I am not interested in the HIPA issues associated with student data.
+
+WARNING:
+Once you uninstall this plugin you will not be able to access it again due to limitations in the authentication process.
