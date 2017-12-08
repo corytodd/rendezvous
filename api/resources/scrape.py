@@ -148,13 +148,7 @@ def start_scrape(wrapper, course_id):
 
     print("Scrape took: {}".format(scrape_record.end_time - scrape_record.start_time))
 
-    # We must blobify all the dicts in the result so the db doesn't choke
-    data_source = list(user_stats_dict.values())
-    should_blob = ['weekday_posts_list', 'post_day_of_year_dict', 'sentiment_dict', 'subjectivity_dict']
-    for dat in data_source:
-        for k in should_blob:
-            dat[k] = json.dumps(dat[k])
-
+    data_source = Stats.blobify(user_stats_dict)
     try:
         for m in util.chunks(data_source, 25):
             with db.db.atomic():
