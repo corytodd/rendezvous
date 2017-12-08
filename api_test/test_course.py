@@ -33,7 +33,7 @@ class TestCourse(unittest.TestCase):
         self.assertEqual(expected.course_id, actual.course_id)
 
     def test_create_non_existing_course_bad_args(self):
-        course_id = 1234
+        course_id = '1234'
         course_name = ['course', 'title']
         actual = course.create_if_not_exist(course_id, course_name)
         self.assertIsNone(actual)

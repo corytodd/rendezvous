@@ -1,5 +1,4 @@
 import datetime
-import json
 import logging
 
 from peewee import CharField, DateTimeField, IntegerField, DoesNotExist
@@ -22,7 +21,7 @@ class Login(BaseModel):
 class Scrape(BaseModel):
     """Record tracks a scrape event, useful for debugging"""
     start_time = DateTimeField(default=datetime.datetime.now, formats='%Y-%m-%d %H:%M:%S.%f')
-    end_time = DateTimeField(null=True,formats='%Y-%m-%d %H:%M:%S.%f')
+    end_time = DateTimeField(null=True, formats='%Y-%m-%d %H:%M:%S.%f')
     course_scanned = CharField(null=False)
     posts_scanned = IntegerField(default=0)
 
@@ -65,6 +64,7 @@ def make_piazza_wrapper(course_id):
         return wrapper
     except DoesNotExist:
         return None
+
 
 def start_scrape(wrapper, course_id):
     """Begin the scraping process targeting the specified Piazza course id
@@ -148,13 +148,7 @@ def start_scrape(wrapper, course_id):
 
     print("Scrape took: {}".format(scrape_record.end_time - scrape_record.start_time))
 
-    # We must blobify all the dicts in the result so the db doesn't choke
-    data_source = list(user_stats_dict.values())
-    should_blob = ['weekday_posts_list', 'post_day_of_year_dict', 'sentiment_dict', 'subjectivity_dict']
-    for dat in data_source:
-        for k in should_blob:
-            dat[k] = json.dumps(dat[k])
-
+    data_source = Stats.blobify(user_stats_dict)
     try:
         for m in util.chunks(data_source, 25):
             with db.db.atomic():

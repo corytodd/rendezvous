@@ -1,6 +1,6 @@
 import json
 
-from peewee import IntegerField, BlobField, FloatField, DoesNotExist, CharField
+from peewee import IntegerField, BlobField, CharField
 
 from api.common import util
 from api.common.db import BaseModel
@@ -111,6 +111,21 @@ class Stats(BaseModel):
         # TODO BUGBUG if there are more posts than days, the average will be 0
         result['days_apart_avg'] = 1 if result['days_apart_avg'] == 0 else result['days_apart_avg']
         return result
+
+    @staticmethod
+    def blobify(stats):
+        """Convert all non-primitive types into blobs
+            :param stats: Dict version to blobify
+            :type stats: dict
+            :return Stats object with blobified fields
+        """
+        # We must blobify all the dicts in the result so the db doesn't choke
+        data_source = list(stats.values())
+        should_blob = ['weekday_posts_list', 'post_day_of_year_dict', 'sentiment_dict', 'subjectivity_dict']
+        for dat in data_source:
+            for k in should_blob:
+                dat[k] = json.dumps(dat[k])
+        return data_source
 
 
 def get_stats(lts_id):

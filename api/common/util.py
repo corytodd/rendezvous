@@ -5,16 +5,16 @@ import time
 import datetime
 
 from collections import OrderedDict
-
+from piazza_api.exceptions import AuthenticationError
+from piazza_api.piazza import Piazza
+from piazza_api.piazza import PiazzaRPC
 from bs4 import BeautifulSoup
 
 # https://stackoverflow.com/a/41496131
 import warnings
+
 warnings.filterwarnings("ignore", category=UserWarning, module='bs4')
 
-from piazza_api.exceptions import AuthenticationError
-from piazza_api.piazza import Piazza
-from piazza_api.piazza import PiazzaRPC
 
 
 def validate_params(should_be, *args):
@@ -180,21 +180,26 @@ def date_get_weekday(timestamp):
     as_date = date_from_timestamp(timestamp)
     return as_date.weekday()
 
+
 def date_from_timestamp(timestamp):
     """Returns datetime from unix timestamp"""
     return datetime.datetime.fromtimestamp(timestamp)
+
 
 def date_get_day_of_year(timestamp):
     """Returns integer day of year from timestamp"""
     return datetime.datetime.fromtimestamp(timestamp).timetuple().tm_yday
 
+
 def date_from_year_day_number(year, day_number):
     """Return date from year and day number, e.g. 2017, 283 == Oct 10 2017"""
     return datetime.datetime(year, 1, 1) + datetime.timedelta(day_number - 1)
 
+
 def day_from_number(day):
     """Return day of week name for day, 0-6 where 0 == Monday"""
     return calendar.day_name[day]
+
 
 def extract_html_text(text):
     """Returns plain text from HTML blob
@@ -206,6 +211,7 @@ def extract_html_text(text):
     soup = BeautifulSoup(text, 'html.parser')
     return soup.get_text()
 
+
 def make_sentiment_css(sentiment):
     """Convert sentiment map into a CSS gradient
         :param sentiment: dict with integer key and float values
@@ -214,18 +220,23 @@ def make_sentiment_css(sentiment):
         :return css string
         :rtype str
     """
+
     def make_colors(vals=None, sat=100, lum=50):
         """Convert val to an HSL string clamped by -1 to 1, red to green
         respectively. For example, -0.45 will produce
             :param vals: List of float values to HSLify
+            :param lum: lumenance
+            :param sat: Saturation
             :type vals: list of float
+            :type sat: int
+            :type lum: int
             :return List of HSL color strings
             :rtype list(str)
         """
         result = []
         # Our range has two points, -1 to 1
         for val in vals:
-            val = int(((val+1)/2) * 128)
+            val = int(((val + 1) / 2) * 128)
             # HSL with full saturation and half luminance
             result.append("hsl({}, {}%, {}%)".format(val, sat, lum))
         return result
@@ -243,7 +254,7 @@ def make_sentiment_css(sentiment):
         copy = list(vals)
         mn = min(copy)
         mx = max(copy)
-        factor = 100.0 / float(mx-mn)
+        factor = 100.0 / float(mx - mn)
         copy = list(map(lambda x: x - mn, vals))
         copy = list(map(lambda x: int(x * factor), copy))
         return copy
@@ -270,6 +281,7 @@ background: linear-gradient(to right, {0});'''
     # Join list of tuples back into a string, a. la #FF0000 0%, # 7F8900 15%, ...
     gradient = ", ".join("%s %s%%" % t for t in recombined)
     return css.format(gradient)
+
 
 def chunks(l, n):
     """Yield successive n-sized chunks from l."""

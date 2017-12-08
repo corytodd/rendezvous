@@ -10,9 +10,10 @@ We can't do anything else until we get the server and service handlers setup so 
 
 ## Database prep
 We don't keep the db in the code repo so securely copy the database to the server
+
     scp -i .ssh\<my_key> cs6460.sqlite3 <name>@<host>:/home/<name>/CS6460
 
-If you'd like, you can install sqlite3 from apt-get and poke around in the database. There is nothing sensitive in there
+If you'd like, you can install sqlite3 from your package manager and poke around in the database. There is nothing sensitive in there
 so have fun.
 
 ## Server prep
@@ -57,19 +58,22 @@ Then test for typos
 
 If no problems, restart the server
 
-   sudo service nginx restart
+    sudo service nginx restart
 
 
 ## Setup Python 3.6 (and other stuff we'll need)
 We need Python 3.6 so add the ppa that has this pre-build for us
+
     sudo add-apt-repository ppa:jonathonf/python-3.6
     sudo apt-get update
     
 We need a bunch of stuff for the uwsgi plugin so let's just do it all at once
+
     sudo apt-get install build-essential python3.6 python3.6-dev uwsgi uwsgi-src uuid-dev libcap-dev libpcre3-dev libssl-dev
     python36 -m venv ~/CS6460/venv
     source ~/CS6460/venv
     pip install -r requirements.txt
+    python -m textblob.download_corpora
 
     cd ~
     PYTHON=python3.6 uwsgi --build-plugin "/usr/src/uwsgi/plugins/python python36"
@@ -82,7 +86,7 @@ We should now have python36, the python36 uwsgi plugin, and a shiny venv. If so,
 ## Serving
 This is the easy part!
 
-   uwsgi config.ini
+    uwsgi config.ini
 
 The server should now be running. 
 

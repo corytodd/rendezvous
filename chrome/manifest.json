@@ -3,7 +3,7 @@
 
     "name": "CS6460",
     "description": "Help yourself stay engaged in distance learning",
-    "version": "2.1",
+    "version": "2.2",
 
     "icons": {
         "16": "assets/icon16.png",                    
@@ -39,10 +39,9 @@
         "cookies",
         "identity",
         "storage",
-        "http://localhost:8008/",
+        "https://***REMOVED***/",
         "http://api.jquery.com/",
         "https://piazza.com/*",
-        "https://cs6460-183715.appspot.com/*",
         "declarativeContent"
     ],
     "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApsAehIeYizaNxjX0JxeDQY1NKoq8W2GIKFgKMMcpcpwLj/mfQXtm0D0XLqx6fkyTkjgVVR89jJngg48owpiofE5WpROA+7XS8+MYIYhe/cY44w+wiaEUGncPr7X6kr3GYQ6WoA4XO6qxEFIQLBL2GqhXWTECaGy82iow3hze2hHiLBWoD6hT4PTNCXxTbDo52m3M42dDk9VHe/H3EqYsnVyWLZ+sCtJvhY502ioal4kZ8iQEPbUZnJJ4OiEetO40atviQO8Yl1CrplPqrADaDetL2XrEroycwj3S7IQlpH6DHhJ6uAJzi9L5gk8Byk8WluEX1qKGux6T5ZEHEZkW3wIDAQAB"

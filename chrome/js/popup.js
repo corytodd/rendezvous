@@ -1,4 +1,4 @@
-const BASE = "http://localhost:5000/api/v1.0/";
+const BASE = "https://***REMOVED***/api/v1.0/";
 const ID_KEY = "identity";
 
 /**
