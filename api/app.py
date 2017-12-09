@@ -8,6 +8,9 @@ from api.resources import user
 from api.resources import course
 from api.resources import stats
 from api.resources import scrape
+from api.resources.course import Course
+from api.resources.stats import Stats
+from api.resources.user import User
 
 app = Flask(__name__)
 ver = "/api/v1.0"
@@ -34,6 +37,17 @@ def check_authorization(func):
         return func(*args, **kwargs)
 
     return check_api_key
+
+def check_header(func):
+    @wraps(func)
+    def check_header_key(*args, **kwargs):
+        header = request.headers.get('XXX-CTHULU-REIGNS')
+        if not header:
+            abort(401)
+        return func(*args, **kwargs)
+
+    return check_header_key
+
 
 
 @app.route(ver + '/enroll', methods=['POST'])
@@ -94,6 +108,22 @@ def task_scrape():
             return jsonify("Unknown course login")
         executor.submit(scrape.start_scrape, wrapper, course_id)
         return jsonify("Task Started")
+
+
+@app.route(ver + '/usage', methods=['GET'])
+@check_header
+def get_user_count():
+    """Report the misc stats about enrollment"""
+    user_count = User.select().count()
+    stats_count = Stats.select().count()
+    course_count = Course.select().count()
+    return jsonify(
+        {
+            "user_count" : user_count,
+            "status_count" : stats_count,
+            "course_count" : course_count
+         }
+    )
 
 
 if __name__ == '__main__':

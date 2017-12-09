@@ -1,5 +1,5 @@
 *.pyc
-env/
+venv/
 .idea/dataSources/
 /.idea/workspace.xml
 *.sqlite3
