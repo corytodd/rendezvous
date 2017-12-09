@@ -1,5 +1,10 @@
 # CS6460 Project Layout
 
+The Chrome plugin is available as an unlisted extension 
+[here](https://chrome.google.com/webstore/detail/cs6460/blfopmdikjopbnkefkhmokknalhcejfk). 
+The code for the project is outlined in the following  sections. Each heading corresponding to 
+the respective directory relative to the package root.
+
 ## api
 This directory contains the actual backend service. This is a Flask application
 written in Python 3.6. It uses PeeWee ORM for managing the database and relational models.
