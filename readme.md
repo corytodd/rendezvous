@@ -1,7 +1,25 @@
-# CS6460 Project Layout
+# Rendezvous
+A browser extension for your digital classroom
 
-The Chrome plugin is available as an unlisted extension 
+## Why?
+This was developed for my course project in CS 6460 at Georgia Tech. See the [formal report](https://github.com/corytodd/rendezvous/blob/master/ctodd_student_attrition_distance_learning.pdf) citing the "why" and the "how". In a nutshell, this tool provides a high-level analysis of your engagement on the Piazza course platform.
+
+This is built on top of the unofficial Piazza API from [here](https://github.com/hfaran/piazza-api).
+
+## Disclaimer
+
+This is not an official API or an official integration. I am not affiliated with Piazza Technologies Inc. in any way, and am not responsible for any damage that could be done with it. Use it at your own risk.
+
+## Chrome Extension
+Due do limitations in how data is acquired, this plugin is not immediately useful to people unless they happen to be in the same courses as myself. For this reason, the plugin is unlisted since I don't really want to get saturated with "this doesn't work" comments.
+The Chrome plugin is available
 [here](https://chrome.google.com/webstore/detail/cs6460/blfopmdikjopbnkefkhmokknalhcejfk). 
+
+
+
+## Project layout
+Eveything following this line was required for the submission of my project. I'm leaving it intact for reference.  
+
 The code for the project is outlined in the following  sections. Each heading corresponding to 
 the respective directory relative to the package root.
 
