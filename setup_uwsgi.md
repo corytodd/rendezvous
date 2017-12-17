@@ -2,33 +2,33 @@
 Getting things setup for production take a little bit of effort but here are all the steps that are required for a Linux host.
 
 ## Get the code
-Copy to home directory as CS6460
+Copy to home directory as rendezvous
 
-    git clone https://github.gatech.edu/ctodd30/CS6460.git
+    git clone https://github.com/corytodd/rendezvous.git
 
 We can't do anything else until we get the server and service handlers setup so let us proceed.
 
 ## Database prep
 We don't keep the db in the code repo so securely copy the database to the server
 
-    scp -i .ssh\<my_key> cs6460.sqlite3 <name>@<host>:/home/<name>/CS6460
+    scp -i .ssh\<my_key> rendezvous.sqlite3 <name>@<host>:/home/<name>/rendezvous
 
 If you'd like, you can install sqlite3 from your package manager and poke around in the database. There is nothing sensitive in there
 so have fun.
 
 ## Server prep
-This assumes you have a function server stack using nginx. Create file named after your host, e.g. ***REMOVED***.conf in /etc/nginx/sites-available
+This assumes you have a function server stack using nginx. Create file named after your host, e.g. tiger.corytodd.us.conf in /etc/nginx/sites-available
 
     server {
         listen 80;
-        server_name     ***REMOVED***;
+        server_name     example.com;
         location / {
                 try_files       $uri    @app;
         }
 
         location @app {
                 include         uwsgi_params;
-                uwsgi_pass      unix:/home/***REMOVED***/CS6460/cs6460.sock;
+                uwsgi_pass      unix:/home/user/rendezvous/rendezvous.sock;
         }
 
         location ~ /\. {
@@ -37,14 +37,14 @@ This assumes you have a function server stack using nginx. Create file named aft
     }
     server {
         listen 443;
-        server_name     ***REMOVED***;
+        server_name     example.com;
         location / {
                 try_files       $uri    @app;
         }
 
         location @app {
                 include         uwsgi_params;
-                uwsgi_pass      unix:/home/***REMOVED***/CS6460/cs6460.sock;
+                uwsgi_pass      unix:/home/user/rendezvous/rendezvous.sock;
         }
 
         location ~ /\. {
@@ -70,8 +70,8 @@ We need Python 3.6 so add the ppa that has this pre-build for us
 We need a bunch of stuff for the uwsgi plugin so let's just do it all at once
 
     sudo apt-get install build-essential python3.6 python3.6-dev uwsgi uwsgi-src uuid-dev libcap-dev libpcre3-dev libssl-dev
-    python36 -m venv ~/CS6460/venv
-    source ~/CS6460/venv
+    python36 -m venv ~/rendezvous/venv
+    source ~/rendezvous/venv
     pip install -r requirements.txt
     python -m textblob.download_corpora
 

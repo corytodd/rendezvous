@@ -38,7 +38,7 @@ def handle_json_post():
     import requests, json
     with open(r'C:\temp\a.ir', 'r') as src:
         raw = src.f.read()
-    resp = requests.post("http://***REMOVED***/api/v1/ir",
+    resp = requests.post("http://tiger.corytodd.us/api/v1/ir",
                       data= json.dumps({'content':raw}, indent=4),  # Need pretty print because ir requires newline
                       headers={'Content-Type': 'application/json'})
     if 'content' in resp.content:
