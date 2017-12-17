@@ -8,7 +8,7 @@ import os
 import shutil
 import subprocess
 
-from hacking import piazza, server, scrapefeeder, nlp
+from tools.hacking import piazza
 from private import creds
 
 
@@ -130,11 +130,11 @@ class CS6460(object):
     def serve(self):
         parser = argparse.ArgumentParser(
             description='Start local development server')
-        server.start()
+        pz = piazza.Piazza()
 
     def play(self):
         parser = argparse.ArgumentParser(
-            description='Play with NLP')
+            description='Play')
         nlp.run_quickstart()
 
 
